@@ -631,7 +631,12 @@
                     </div>
                 </div>
 
-                <button class="footer-btn" onclick="submitProfile()">Complete Profile</button>
+                <div class="form-group" style="margin-top: 30px; display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" id="markAsComplete" style="width: 20px; height: 20px;">
+                    <label for="markAsComplete" style="margin: 0; font-weight: 600;">Mark Profile as Complete</label>
+                </div>
+
+                <button class="footer-btn" onclick="submitProfile()">Save Profile</button>
             </div>
 
         </form>
@@ -640,7 +645,7 @@
     </div>
 
     <script>
-        const API_BASE = 'https://api-nutripathai.nyusoft.in/api';
+        const API_BASE = 'http://localhost:3001/api';
         let currentStep = 1;
         let formData = {
             types_of_activity: [],
@@ -855,11 +860,11 @@
                 website: document.getElementById('website').value,
                 // Add Target Value
                 target_value: document.getElementById('targetValue').value,
-                is_profile_complete: true
+                is_profile_complete: document.getElementById('markAsComplete').checked
             };
 
             try {
-                const res = await fetch(`${API_BASE}/auth/profile/${userId}`, {
+                const res = await fetch(`${API_BASE}/auth/profile`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -884,15 +889,6 @@
             }
         }
     </script>
-
-
-
-
-
-    <!-- Back to Dashboard Button -->
-    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        ← Dashboard
-    </a>
 
 </body>
 
