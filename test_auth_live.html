@@ -329,7 +329,7 @@
     </div>
 
     <script>
-        const BASE_URL = 'https://api-nutripathai.nyusoft.in/api/auth';
+        const BASE_URL = 'http://localhost:3001/api/auth';
         let currentUserId = null;
         let currentUserEmail = null;
         let authToken = null; // Store token for dashboard actions
@@ -476,11 +476,11 @@
             document.getElementById('profileView').innerHTML = '<p style="text-align: center;">Loading...</p>';
 
             try {
-                const res = await fetch(`${BASE_URL}/profile/${currentUserId}`, {
+                const res = await fetch(`${BASE_URL}/profile`, {
                     headers: { 'Authorization': `Bearer ${authToken}` }
                 });
                 const data = await res.json();
-                log({ endpoint: `/profile/${currentUserId}`, status: res.status, response: data });
+                log({ endpoint: `/profile`, status: res.status, response: data });
 
                 if (data.status || res.ok) {
                     renderProfile(data.data);
@@ -565,7 +565,7 @@
             }
 
             try {
-                const res = await fetch(`${BASE_URL}/profile/${currentUserId}`, {
+                const res = await fetch(`${BASE_URL}/profile`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${authToken}`
@@ -574,7 +574,7 @@
                     body: formData
                 });
                 const data = await res.json();
-                log({ endpoint: `/profile/${currentUserId} (PUT)`, status: res.status, response: data });
+                log({ endpoint: `/profile (PUT)`, status: res.status, response: data });
 
                 if (res.ok || data.status) {
                     showStatus('profileUpdateStatus', 'Profile Updated!', false);
@@ -645,15 +645,6 @@
             document.getElementById(id).classList.add('hidden');
         }
     </script>
-
-
-
-
-    <!-- Back to Dashboard Button -->
-    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        ← Dashboard
-    </a>
-
 </body>
 
 </html>
