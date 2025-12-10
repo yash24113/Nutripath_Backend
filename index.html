@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --sidebar-width: 280px;
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.15) 0%, transparent 20%);
+        }
+
+        /* Layout */
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: rgba(90, 245, 129, 0.95);
+            backdrop-filter: blur(10px);
+            border-right: var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+            transform: translateX(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+        }
+
+        .sidebar-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: var(--glass-border);
+        }
+
+        .sidebar-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-search {
+            background: rgba(255, 255, 255, 0.05);
+            border: var(--glass-border);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: #fff;
+            width: 100%;
+            margin-bottom: 1.5rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .nav-search:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary-glow);
+        }
+
+        .nav-list {
+            list-style: none;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .nav-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .nav-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding-bottom: 2rem;
+        }
+
+        /* Card Styles */
+        .file-card {
+            background: var(--bg-card);
+            border: var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 180px;
+        }
+
+        .file-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 0%, rgba(255, 255, 255, 0.03) 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .file-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .file-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .card-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-action {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .file-card:hover .card-action {
+            background: var(--primary);
+            color: white;
+            transform: rotate(-45deg);
+        }
+
+        /* Toggle Button */
+        .toggle-sidebar {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--primary);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: none;
+            /* Show on mobile */
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+            border: none;
+            cursor: pointer;
+            z-index: 200;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                height: 100vh;
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .toggle-sidebar {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <img src="logo.svg" alt="Nutripath AI" style="height: 40px;">
+            </div>
+
+            <input type="text" class="nav-search" placeholder="Quick find..." id="searchInput">
+
+            <ul class="nav-list" id="navList">
+                <!-- Nav items will be injected here -->
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <h1 style="font-size: 2rem; margin-bottom: 2rem; font-weight: 600;">Files Overview</h1>
+            <div class="files-grid" id="filesGrid">
+                <!-- Cards will be injected here -->
+            </div>
+        </main>
+    </div>
+
+    <button class="toggle-sidebar" id="toggleSidebar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+    </button>
+
+    <script>
+        // File Data
+        const files = [
+            { name: "health_test.html", category: "Test", icon: "🏥" },
+            { name: "social-login-test.html", category: "Auth", icon: "🔐" },
+            { name: "test-payment.html", category: "Payment", icon: "💳" },
+            { name: "test_activity_live.html", category: "Live", icon: "🏃" },
+            { name: "test_auth_live.html", category: "Auth", icon: "🛡️" },
+            { name: "test_category_dietary_live.html", category: "Live", icon: "🥗" },
+            { name: "test_certified_user_live.html", category: "User", icon: "🎓" },
+            { name: "test_dietary_preference_live.html", category: "Live", icon: "🥑" },
+            { name: "test_fitness_goal_live.html", category: "Live", icon: "🎯" },
+            { name: "test_food_allergies_live.html", category: "Live", icon: "⚠️" },
+            { name: "test_onboarding_live.html", category: "Live", icon: "🚀" },
+            { name: "test_recipe_live.html", category: "Live", icon: "🍳" },
+            { name: "test_shopping_live.html", category: "Live", icon: "🛒" },
+            { name: "user_posts_test_live.html", category: "Social", icon: "📝" }
+        ];
+
+        const navList = document.getElementById('navList');
+        const filesGrid = document.getElementById('filesGrid');
+        const searchInput = document.getElementById('searchInput');
+
+        function renderFiles(filter = "") {
+            navList.innerHTML = "";
+            filesGrid.innerHTML = "";
+
+            const filteredFiles = files.filter(f => f.name.toLowerCase().includes(filter.toLowerCase()));
+
+            filteredFiles.forEach(file => {
+                // Sidebar Link
+                const li = document.createElement('li');
+                li.className = 'nav-item';
+                li.innerHTML = `<a href="${file.name}" class="nav-link">
+                    <span style="margin-right: 10px">${file.icon}</span> ${file.name}
+                </a>`;
+                navList.appendChild(li);
+
+                // Grid Card
+                const card = document.createElement('div');
+                card.className = 'file-card';
+                card.onclick = () => window.location.href = file.name;
+                card.innerHTML = `
+                    <div>
+                        <div class="card-icon">${file.icon}</div>
+                        <div class="card-title">${file.name}</div>
+                        <div class="card-meta">${file.category}</div>
+                    </div>
+                    <div style="display:flex; justify-content:flex-end;">
+                        <div class="card-action">➜</div>
+                    </div>
+                `;
+                filesGrid.appendChild(card);
+            });
+        }
+
+        // Init
+        renderFiles();
+
+        // Search Listener
+        searchInput.addEventListener('input', (e) => {
+            renderFiles(e.target.value);
+        });
+
+        // Mobile Sidebar Toggle
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const sidebar = document.getElementById('sidebar');
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768 &&
+                !sidebar.contains(e.target) &&
+                !toggleBtn.contains(e.target) &&
+                sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dietary Categories (Live)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-top: 0;
+            color: #1a1a1a;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
+        .btn.delete {
+            background: #dc3545;
+        }
+
+        .btn.delete:hover {
+            background: #c82333;
+        }
+
+        .btn.edit {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .list-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .list-item:last-child {
+            border-bottom: none;
+        }
+
+        .icon-preview {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        #response {
+            background: #2d2d2d;
+            color: #0f0;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>Test Dietary Categories</h1>
+
+        <div style="background: #e9ecef; padding: 10px; border-radius: 4px; margin-bottom: 20px;">
+            <label>API Base URL</label>
+            <input type="text" id="apiBase" value="https://api-nutripathai.nyusoft.in/api/category-dietary"
+                style="font-family: monospace;">
+        </div>
+
+        <!-- CREATE / EDIT FORM -->
+        <div style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-bottom: 30px;">
+            <h3 id="formTitle">Add New Category</h3>
+            <form id="catForm" onsubmit="handleSubmit(event)">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" id="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="description" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Icon (Image)</label>
+                    <input type="file" id="iconFile" accept="image/*">
+                    <div style="margin-top:5px;">
+                        <img id="preview" src="" style="height:50px; display:none;">
+                    </div>
+                </div>
+                <button type="submit" class="btn" id="submitBtn">Create Category</button>
+                <button type="button" class="btn" style="background:#6c757d; display:none;" id="cancelBtn"
+                    onclick="resetForm()">Cancel</button>
+            </form>
+        </div>
+
+        <div id="response"></div>
+
+        <h3>Existing Categories <button onclick="fetchCategories()"
+                style="font-size:0.8rem; cursor:pointer; background:none; border:none; color:blue; text-decoration:underline;">(Refresh)</button>
+        </h3>
+        <div id="list">
+            <div style="color:#666; text-align:center;">Loading...</div>
+        </div>
+
+    </div>
+
+    <script>
+        const apiBaseInput = document.getElementById('apiBase');
+
+        // Load on start
+        fetchCategories();
+
+        async function fetchCategories() {
+            const list = document.getElementById('list');
+            list.innerHTML = '<div style="color:#666; text-align:center;">Loading...</div>';
+
+            try {
+                const res = await fetch(apiBaseInput.value);
+                const data = await res.json();
+
+                if (data.status) {
+                    renderList(data.data.data || data.data); // Handle pagination structure
+                } else {
+                    list.innerHTML = `<div style="color:red;">Error: ${data.message}</div>`;
+                }
+            } catch (e) {
+                list.innerHTML = `<div style="color:red;">Fetch Error: ${e.message}</div>`;
+            }
+        }
+
+        function renderList(items) {
+            const list = document.getElementById('list');
+            list.innerHTML = '';
+            if (!items || items.length === 0) {
+                list.innerHTML = '<div>No categories found.</div>';
+                return;
+            }
+
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'list-item';
+
+                const imgUrl = item.icon || 'https://via.placeholder.com/40';
+
+                div.innerHTML = `
+                <img src="${imgUrl}" class="icon-preview">
+                <div class="item-info">
+                    <div style="font-weight:bold;">${item.name}</div>
+                    <div style="font-size:0.85rem; color:#666;">${item.description || ''}</div>
+                </div>
+                <div class="item-actions">
+                    <button class="btn edit" style="padding:5px 10px; font-size:0.8rem;" onclick='editItem(${JSON.stringify(item)})'>Edit</button>
+                    <button class="btn delete" style="padding:5px 10px; font-size:0.8rem;" onclick="deleteItem('${item.id}')">Delete</button>
+                </div>
+            `;
+                list.appendChild(div);
+            });
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const name = document.getElementById('name').value;
+            const desc = document.getElementById('description').value;
+            const file = document.getElementById('iconFile').files[0];
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('description', desc);
+            if (file) formData.append('icon', file);
+
+            const log = document.getElementById('response');
+            log.style.display = 'block';
+            log.innerText = 'Sending...';
+
+            try {
+                let url = apiBaseInput.value;
+                let method = 'POST';
+
+                if (id) {
+                    url = `${apiBaseInput.value}/${id}`;
+                    method = 'PUT';
+                }
+
+                const res = await fetch(url, {
+                    method: method,
+                    body: formData
+                });
+
+                const result = await res.json();
+                log.innerText = JSON.stringify(result, null, 2);
+
+                if (result.status) {
+                    resetForm();
+                    fetchCategories();
+                }
+
+            } catch (e) {
+                log.innerText = 'Error: ' + e.message;
+            }
+        }
+
+        async function deleteItem(id) {
+            if (!confirm('Are you sure?')) return;
+
+            try {
+                const res = await fetch(`${apiBaseInput.value}/${id}`, { method: 'DELETE' });
+                const result = await res.json();
+                if (result.status) {
+                    fetchCategories();
+                } else {
+                    alert(result.message);
+                }
+            } catch (e) {
+                alert(e.message);
+            }
+        }
+
+        function editItem(item) {
+            document.getElementById('formTitle').innerText = 'Edit Category';
+            document.getElementById('submitBtn').innerText = 'Update Category';
+            document.getElementById('editId').value = item.id;
+            document.getElementById('name').value = item.name;
+            document.getElementById('description').value = item.description || '';
+            document.getElementById('cancelBtn').style.display = 'inline-block';
+
+            if (item.icon) {
+                const prev = document.getElementById('preview');
+                prev.src = item.icon;
+                prev.style.display = 'block';
+            }
+
+            window.scrollTo(0, 0);
+        }
+
+        function resetForm() {
+            document.getElementById('catForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('formTitle').innerText = 'Add New Category';
+            document.getElementById('submitBtn').innerText = 'Create Category';
+            document.getElementById('cancelBtn').style.display = 'none';
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('response').style.display = 'none';
+        }
+
+        // Image preview
+        document.getElementById('iconFile').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const prev = document.getElementById('preview');
+                    prev.src = e.target.result;
+                    prev.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+    </script>
+
+
+
+
+
+    <!-- Back to Dashboard Button -->
+    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ← Dashboard
+    </a>
+
+</body>
+
+</html>

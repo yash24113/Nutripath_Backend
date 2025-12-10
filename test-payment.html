@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subscription Test Payment</title>
+<script src="https://js.stripe.com/v3/"></script>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .card-box {
+        padding: 12px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        margin: 15px 0;
+    }
+    button {
+        background: #5469d4;
+        color: #fff;
+        padding: 12px;
+        border-radius: 6px;
+        border: none;
+        width: 100%;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    button:disabled { background: #ccc; }
+    .success { color: green; margin-top: 20px; display: none; }
+    .error { color: red; margin-top: 10px; }
+</style>
+
+</head>
+<body>
+
+<h2>Subscribe to a Plan</h2>
+
+<label>Plan ID:</label> <input id="plan-id" value="1" style="width: 100%; padding:10px">
+
+<input type="hidden" id="auth-token"
+    value="Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL2lkZW50aXR5dG9vbGtpdC5nb29nbGVhcGlzLmNvbS9nb29nbGUuaWRlbnRpdHkuaWRlbnRpdHl0b29sa2l0LnYxLklkZW50aXR5VG9vbGtpdCIsImlhdCI6MTc2NDY3OTk0MCwiZXhwIjoxNzY0NjgzNTQwLCJpc3MiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BudWF0cmlwYXRoYWkuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BudWF0cmlwYXRoYWkuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJ1aWQiOiJ1c2VyLTEifQ.StnGK5SFKWwfpxfpmCOkBr7wL2ZLAW2fSB59ELQsenbzw9f6Svr-R2GI8RkwKKUerqKMjdhVV4gVUgQvGlBAEpjvvIIoKyOFuqrbLDo4vQFw4onywHJSUW5vhT0isFxwV6pIEEEcj8GUygC4oIfpuVRlVfYT1RQM0RQOBC8yauXeWC66fMs0wQW0xAnc4tn6tVB7bishDOm6eRHVSTCGHUSGbat1L5G9sAE02PabTCR7O-ufe_IIsvNfgt4HOoTBGK_L3rb3tTY0XUrTd2H6j4S2buU06LBzqVR68XKXs5RawWp-tyO1R2aqNb3tXBnQ_zzVtrGBVqkx4j0Z4YmLcw">
+
+<h3>Enter Card Details</h3>
+<div id="card-element" class="card-box"></div>
+
+<button id="pay-btn">Pay & Subscribe</button>
+
+<div id="error-message" class="error"></div>
+<div id="success-message" class="success"></div>
+
+<script>
+const stripe = Stripe("pk_test_51SaAH2FKwxXPNM0rDZm8L0kgkxn4T5P1I9rZXNgZZpbbOafBcLF1WzjAiNihWfdfaXFcLcvag6NF3tekFFdOwixx00fH8PW313");
+const elements = stripe.elements();
+const card = elements.create("card");
+card.mount("#card-element");
+
+const payBtn = document.getElementById("pay-btn");
+const errorBox = document.getElementById("error-message");
+const successBox = document.getElementById("success-message");
+const AUTH_TOKEN = document.getElementById("auth-token").value;
+
+payBtn.addEventListener("click", async () => {
+    errorBox.textContent = "";
+    successBox.style.display = "none";
+    const planId = parseInt(document.getElementById("plan-id").value);
+
+    payBtn.disabled = true;
+    payBtn.textContent = "Processing...";
+
+    try {
+        // 1️⃣ Create PaymentIntent on backend
+        const createRes = await fetch(
+            "https://api-nutripathai.nyusoft.in/api/v1/user/subscriptions/create-payment-intent",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": AUTH_TOKEN
+                },
+                body: JSON.stringify({ plan_id: planId })
+            }
+        );
+
+        const createData = await createRes.json();
+        if (!createRes.ok) throw new Error(createData.message || "Failed to create PaymentIntent");
+
+        const clientSecret = createData?.data?.clientSecret;
+        const paymentIntentId = createData?.data?.payment_intent_id;
+
+        if (!clientSecret || !paymentIntentId) throw new Error("Backend did not return clientSecret or paymentIntentId");
+
+        // 2️⃣ Confirm Card Payment with Stripe
+        const confirmResult = await stripe.confirmCardPayment(clientSecret, {
+            payment_method: {
+                card: card
+            }
+        });
+
+        if (confirmResult.error) throw new Error(confirmResult.error.message);
+
+        // 3️⃣ Call backend to confirm subscription
+        // Only send plan_id and payment_intent_id
+        const confirmRes = await fetch(
+            "https://api-nutripathai.nyusoft.in/api/v1/user/subscriptions/confirm",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": AUTH_TOKEN
+                },
+                body: JSON.stringify({
+                    plan_id: planId,
+                    payment_intent_id: paymentIntentId
+                })
+            }
+        );
+
+        const confirmData = await confirmRes.json();
+        if (!confirmRes.ok) throw new Error(confirmData.message || "Subscription confirmation failed");
+
+        successBox.style.display = "block";
+        successBox.textContent = "Subscription activated successfully!";
+
+    } catch (err) {
+        errorBox.textContent = err.message;
+    } finally {
+        payBtn.disabled = false;
+        payBtn.textContent = "Pay & Subscribe";
+    }
+});
+</script>
+
+
+
+
+
+    <!-- Back to Dashboard Button -->
+    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ← Dashboard
+    </a>
+
+</body>
+</html>

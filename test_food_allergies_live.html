@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food Allergies Manager</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f9fafb;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #10B981;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #EF4444;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6B7280;
+            color: white;
+        }
+
+        .item-list {
+            margin-top: 20px;
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .item-row:last-child {
+            border-bottom: none;
+        }
+
+        .item-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 15px;
+            background: #eee;
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .item-id {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        #preview {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: none;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+        }
+
+        #status {
+            margin-top: 10px;
+            color: green;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Food Allergies Manager</h2>
+
+        <!-- FORM -->
+        <div style="background: #f0fdf4; padding: 15px; border-radius: 8px;">
+            <h3 style="margin-top:0;">Add / Edit Allergy</h3>
+            <form id="allergyForm" onsubmit="handleSubmit(event)">
+                <input type="hidden" id="editId">
+
+                <div class="form-group">
+                    <label class="form-label">Allergy Name</label>
+                    <input type="text" class="form-input" id="foodName" required placeholder="E.g. Peanuts, Gluten">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Icon</label>
+                    <input type="file" id="iconInput" accept="image/*" class="form-input">
+                    <img id="preview" src="">
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn">Create Allergy</button>
+                <button type="button" class="btn btn-secondary" id="cancelBtn" onclick="resetForm()"
+                    style="display:none;">Cancel</button>
+            </form>
+            <div id="status"></div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+            <h3>Existing Allergies</h3>
+            <button onclick="fetchItems()" class="btn btn-secondary"
+                style="padding: 5px 10px; font-size: 0.8rem;">Refresh</button>
+        </div>
+
+        <div id="list" class="item-list">Loading...</div>
+    </div>
+
+    <script>
+        const API_URL = 'https://api-nutripathai.nyusoft.in/api/food-allergies';
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('editId').value;
+            const name = document.getElementById('foodName').value;
+            const file = document.getElementById('iconInput').files[0];
+            const status = document.getElementById('status');
+
+            const formData = new FormData();
+            formData.append('food_name', name);
+            if (file) formData.append('icon', file); // Field name 'icon'
+
+            status.innerText = 'Sending...';
+
+            try {
+                let res;
+                if (id) {
+                    // UPDATE
+                    res = await fetch(`${API_URL}/${id}`, {
+                        method: 'PUT',
+                        body: formData
+                    });
+                } else {
+                    // CREATE
+                    res = await fetch(API_URL, {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
+
+                const data = await res.json();
+                status.innerText = data.message || JSON.stringify(data);
+
+                if (data.status || data.success) { // Handle varied response format
+                    resetForm();
+                    fetchItems();
+                } else {
+                    status.style.color = 'red';
+                }
+
+            } catch (err) {
+                status.innerText = 'Error: ' + err.message;
+                status.style.color = 'red';
+            }
+        }
+
+        async function fetchItems() {
+            const list = document.getElementById('list');
+            // list.innerHTML = 'Loading...';
+            try {
+                const res = await fetch(API_URL);
+                const json = await res.json();
+
+                // Adjust based on response structure { status: true, data: { data: [] } } or { data: [] }
+                const items = json.data && json.data.data ? json.data.data : (json.data || []);
+
+                if (items.length === 0) {
+                    list.innerHTML = '<div style="text-align:center; color:#666;">No allergies found</div>';
+                    return;
+                }
+
+                const html = items.map(item => `
+                <div class="item-row">
+                    <img src="${item.icon || 'https://via.placeholder.com/50'}" class="item-icon" onerror="this.src='https://via.placeholder.com/50'">
+                    <div class="item-content">
+                        <div class="item-name">${item.food_name}</div>
+                        <div class="item-id">ID: ${item.id}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-secondary" style="font-size:0.8rem; padding: 5px 10px;" onclick='editItem(${JSON.stringify(item)})'>Edit</button>
+                        <button class="btn btn-danger" style="font-size:0.8rem; padding: 5px 10px;" onclick="deleteItem('${item.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+
+                list.innerHTML = html;
+
+            } catch (err) {
+                list.innerText = 'Error fetching: ' + err.message;
+            }
+        }
+
+        async function deleteItem(id) {
+            if (!confirm('Are you sure?')) return;
+            try {
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                fetchItems();
+            } catch (err) {
+                alert('Error deleting: ' + err.message);
+            }
+        }
+
+        function editItem(item) {
+            document.getElementById('editId').value = item.id;
+            document.getElementById('foodName').value = item.food_name;
+            document.getElementById('submitBtn').innerText = 'Update Allergy';
+            document.getElementById('cancelBtn').style.display = 'inline-block';
+
+            const img = document.getElementById('preview');
+            if (item.icon) {
+                img.src = item.icon;
+                img.style.display = 'block';
+            } else {
+                img.style.display = 'none';
+            }
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('allergyForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('submitBtn').innerText = 'Create Allergy';
+            document.getElementById('cancelBtn').style.display = 'none';
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('status').innerText = '';
+            document.getElementById('status').style.color = 'green';
+        }
+
+        // Initial Load
+        fetchItems();
+    </script>
+
+
+
+
+
+    <!-- Back to Dashboard Button -->
+    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ← Dashboard
+    </a>
+
+</body>
+
+</html>

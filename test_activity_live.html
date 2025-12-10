@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Test Page</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f9fafb;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #10B981;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #EF4444;
+            color: white;
+        }
+
+        /* Grid for list */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            position: relative;
+        }
+
+        .card img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .card-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .card-actions {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .action-link {
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: blue;
+            text-decoration: underline;
+        }
+
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Activity Manager</h2>
+
+        <!-- CREATE FORM -->
+        <form id="createForm" onsubmit="handleSubmit(event)">
+            <input type="hidden" id="editId">
+
+            <div class="form-group">
+                <label class="form-label">Name</label>
+                <input type="text" class="form-input" id="name" required placeholder="E.g. Yoga, Running">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Image (Icon)</label>
+                <input type="file" id="imageInput" accept="image/*">
+                <img id="preview" src="" style="width: 50px; display:none; margin-top:5px;">
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="submitBtn">Create Activity</button>
+            <button type="button" class="btn" onclick="resetForm()" style="background:#ddd; display:none;"
+                id="cancelBtn">Cancel</button>
+        </form>
+
+        <div id="status" style="margin-top:20px; font-family:monospace; color:green;"></div>
+
+        <hr>
+
+        <h3>Existing Activities <button onclick="fetchActivities()" class="btn"
+                style="padding:5px 10px; font-size:0.8rem; background:#eee;">Refresh</button></h3>
+        <div id="list" class="grid"></div>
+    </div>
+
+    <script>
+        const API_URL = 'https://api-nutripathai.nyusoft.in/api/activities';
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('editId').value;
+            const name = document.getElementById('name').value;
+            const file = document.getElementById('imageInput').files[0];
+
+            const formData = new FormData();
+            formData.append('name', name);
+            if (file) formData.append('image', file);
+
+            document.getElementById('status').innerText = 'Sending...';
+
+            try {
+                let res;
+                if (id) {
+                    // UPDATE
+                    res = await fetch(`${API_URL}/${id}`, {
+                        method: 'PUT',
+                        body: formData
+                    });
+                } else {
+                    // CREATE
+                    res = await fetch(API_URL, {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
+
+                const data = await res.json();
+                document.getElementById('status').innerText = JSON.stringify(data, null, 2);
+
+                if (data.status || data.success) {
+                    resetForm();
+                    fetchActivities();
+                }
+
+            } catch (err) {
+                document.getElementById('status').innerText = 'Error: ' + err.message;
+            }
+        }
+
+        async function fetchActivities() {
+            document.getElementById('list').innerHTML = 'Loading...';
+            try {
+                const res = await fetch(API_URL);
+                const data = await res.json();
+
+                const items = data.data || []; // Adjust based on actual API response structure
+
+                const html = items.map(item => `
+                <div class="card">
+                    <img src="${item.image || 'https://via.placeholder.com/60'}" onerror="this.src='https://via.placeholder.com/60'">
+                    <div class="card-name">${item.name}</div>
+                    <div class="card-actions">
+                        <span class="action-link" onclick='editActivity(${JSON.stringify(item)})'>Edit</span>
+                        <span class="action-link" style="color:red" onclick="deleteActivity(${item.id})">Delete</span>
+                    </div>
+                </div>
+            `).join('');
+
+                document.getElementById('list').innerHTML = html || 'No activities found.';
+
+            } catch (err) {
+                document.getElementById('list').innerText = 'Error fetching: ' + err.message;
+            }
+        }
+
+        async function deleteActivity(id) {
+            if (!confirm('Are you sure?')) return;
+            try {
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                fetchActivities();
+            } catch (err) {
+                alert('Error deleting: ' + err.message);
+            }
+        }
+
+        function editActivity(item) {
+            document.getElementById('editId').value = item.id;
+            document.getElementById('name').value = item.name;
+            document.getElementById('submitBtn').innerText = 'Update Activity';
+            document.getElementById('cancelBtn').style.display = 'inline-block';
+
+            if (item.image) {
+                const img = document.getElementById('preview');
+                img.src = item.image;
+                img.style.display = 'block';
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('createForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('submitBtn').innerText = 'Create Activity';
+            document.getElementById('cancelBtn').style.display = 'none';
+            document.getElementById('preview').style.display = 'none';
+        }
+
+        // Initial Load
+        fetchActivities();
+    </script>
+
+
+
+
+
+    <!-- Back to Dashboard Button -->
+    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ← Dashboard
+    </a>
+
+</body>
+
+</html>

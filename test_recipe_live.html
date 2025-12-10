@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Recipe Test</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f3f4f6;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #047857;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        .add-more {
+            color: #047857;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+
+        .card-upload {
+            border: 2px dashed #A7F3D0;
+            background: #F0FDF4;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .chip {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #E5E7EB;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-right: 5px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .chip.selected {
+            background: #D1FAE5;
+            color: #047857;
+            border: 1px solid #047857;
+        }
+
+        .remove-btn {
+            color: red;
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+
+        /* Recipe Card Styles */
+        .recipe-list {
+            margin-top: 30px;
+        }
+
+        .recipe-card {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .recipe-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            object-fit: cover;
+            background: #eee;
+        }
+
+        .recipe-info {
+            flex: 1;
+        }
+
+        .recipe-tags {
+            font-size: 0.75rem;
+            margin-bottom: 5px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .recipe-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin: 0 0 5px 0;
+            color: #111;
+        }
+
+        .recipe-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .user-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #ddd;
+        }
+
+        .nutrition-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .n-badge {
+            background: #F3F4F6;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 600;
+        }
+
+        .action-icons {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            cursor: pointer;
+            color: #047857;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- Auth -->
+        <div class="form-group" style="padding: 10px; background: #FEF3C7; border-radius: 10px;">
+            <label>Auth Token (Bearer)</label>
+            <input type="text" id="authToken" placeholder="Paste your Token here">
+        </div>
+
+        <h1>Create Recipe</h1>
+
+        <form id="recipeForm">
+
+            <div class="form-group">
+                <input type="text" id="recipeName" placeholder="Name of Recipe" required>
+            </div>
+
+            <div class="form-group">
+                <div class="card-upload" onclick="document.getElementById('imgInput').click()">
+                    📸 Add a photo of your dish
+                </div>
+                <input type="file" id="imgInput" style="display:none" onchange="previewImage(this)">
+                <img id="imgPreview" style="width:100%; margin-top:10px; border-radius:10px; display:none;">
+            </div>
+
+            <div class="form-group">
+                <label>Serving size</label>
+                <input type="number" id="servingSize" value="1">
+            </div>
+
+            <div class="form-group">
+                <label>Ingredients</label>
+                <div id="ingredientsList">
+                    <!-- Dynamic -->
+                </div>
+                <div class="add-more" onclick="addIngredient()">+ Add more</div>
+            </div>
+
+            <div class="form-group">
+                <label>Nutritions per serving</label>
+                <div class="row">
+                    <div class="col"><input type="number" id="cal" placeholder="Calories (kcal)"></div>
+                    <div class="col"><input type="number" id="carb" placeholder="Carbs (g)"></div>
+                </div>
+                <div class="row">
+                    <div class="col"><input type="number" id="prot" placeholder="Protein (g)"></div>
+                    <div class="col"><input type="number" id="fat" placeholder="Fats (g)"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Instructions</label>
+                <div id="stepsList"></div>
+                <div class="add-more" onclick="addStep()">+ Add steps</div>
+            </div>
+
+            <div class="form-group">
+                <label>Dietary</label>
+                <div id="dietaryTags">
+                    <div style="color:#666; font-size:0.8rem;">Loading tags...</div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Meal Date</label>
+                <input type="datetime-local" id="mealDate">
+            </div>
+
+            <div class="form-group">
+                <label>Timing</label>
+                <select id="mealTiming">
+                    <option value="Breakfast">Breakfast</option>
+                    <option value="Lunch">Lunch</option>
+                    <option value="Dinner">Dinner</option>
+                    <option value="Snack">Snack</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn" id="submitBtn">Save to Library</button>
+            <button type="button" class="btn" id="cancelEditBtn"
+                style="background:#6B7280; margin-top:10px; display:none;" onclick="cancelEdit()">Cancel Edit</button>
+        </form>
+
+        <div id="response"
+            style="margin-top:20px; white-space: pre-wrap; font-family:monospace; font-size:0.8rem; background:#111; color:#0f0; padding:10px; border-radius:10px; display:none">
+        </div>
+
+        <div class="recipe-list">
+            <h2>My Recipes <span onclick="fetchRecipes()"
+                    style="font-size:0.8rem; color:#047857; cursor:pointer;">(Refresh)</span></h2>
+            <div id="myRecipesList">
+                <div style="text-align:center; color:#999;">Load recipes to see them here...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let editingRecipeId = null;
+
+        // Init
+        const BASE_URL = 'https://api-nutripathai.nyusoft.in/api/user-recipes';
+        const TAGS_URL = 'https://api-nutripathai.nyusoft.in/api/category-dietary';
+
+        addIngredient();
+        addStep();
+        fetchTags();
+
+        function createInput(placeholder, type = 'text') {
+            const i = document.createElement('input'); i.type = type; i.placeholder = placeholder; return i;
+        }
+
+        async function deleteRecipe(id) {
+            if (!confirm("Are you sure?")) return;
+            const token = document.getElementById('authToken').value.trim();
+            const logBox = document.getElementById('response');
+
+            try {
+                const res = await fetch(`${BASE_URL}/delete/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                alert(data.message);
+                if (data.status) fetchRecipes();
+            } catch (e) {
+                alert("Error deleting: " + e.message);
+            }
+        }
+
+        function editRecipe(recipeString) {
+            const recipe = JSON.parse(decodeURIComponent(recipeString));
+            editingRecipeId = recipe.id;
+
+            document.getElementById('submitBtn').innerText = "Update Recipe";
+            document.getElementById('cancelEditBtn').style.display = 'block';
+            document.querySelector('h1').innerText = "Edit Recipe";
+
+            // Populate fields
+            document.getElementById('recipeName').value = recipe.name;
+            document.getElementById('servingSize').value = recipe.serving_size || 1;
+
+            if (recipe.meal_date) document.getElementById('mealDate').value = new Date(recipe.meal_date).toISOString().slice(0, 16);
+            if (recipe.meal_timing) document.getElementById('mealTiming').value = recipe.meal_timing;
+
+            // Image Preview
+            if (recipe.image) {
+                document.getElementById('imgPreview').src = recipe.image;
+                document.getElementById('imgPreview').style.display = 'block';
+            }
+
+            // Ingredients
+            const list = document.getElementById('ingredientsList');
+            list.innerHTML = '';
+            if (recipe.ingredients && Array.isArray(recipe.ingredients)) {
+                recipe.ingredients.forEach(ing => {
+                    const div = document.createElement('div');
+                    div.className = 'row';
+                    div.innerHTML = `
+                        <div style="flex:2"><input type="text" placeholder="Ingredient name" class="ing-name" value="${ing.name}"></div>
+                        <div style="flex:1"><input type="number" placeholder="Qty" class="ing-qty" value="${ing.quantity}"></div>
+                        <div style="flex:1">
+                            <select class="ing-unit">
+                                <option value="g" ${ing.unit === 'g' ? 'selected' : ''}>g</option>
+                                <option value="ml" ${ing.unit === 'ml' ? 'selected' : ''}>ml</option>
+                                <option value="cup" ${ing.unit === 'cup' ? 'selected' : ''}>cup</option>
+                                <option value="tbsp" ${ing.unit === 'tbsp' ? 'selected' : ''}>tbsp</option>
+                                <option value="tsp" ${ing.unit === 'tsp' ? 'selected' : ''}>tsp</option>
+                            </select>
+                        </div>
+                        <div style="display:flex; align-items:center;" onclick="this.parentElement.remove()">🗑️</div>
+                    `;
+                    list.appendChild(div);
+                });
+            } else {
+                addIngredient(); // fallback
+            }
+
+            // Nutrition
+            if (recipe.nutrition_info) {
+                document.getElementById('cal').value = recipe.nutrition_info.calories || '';
+                document.getElementById('carb').value = recipe.nutrition_info.carbs || '';
+                document.getElementById('prot').value = recipe.nutrition_info.protein || '';
+                document.getElementById('fat').value = recipe.nutrition_info.fats || '';
+            }
+
+            // Instructions
+            const sList = document.getElementById('stepsList');
+            sList.innerHTML = '';
+            if (recipe.instructions && Array.isArray(recipe.instructions)) {
+                recipe.instructions.forEach(step => {
+                    const div = document.createElement('div');
+                    div.style.marginBottom = '10px';
+                    const i = createInput(`Enter step...`);
+                    i.className = 'step-input';
+                    i.value = step;
+                    div.appendChild(i);
+                    sList.appendChild(div);
+                });
+            } else {
+                addStep();
+            }
+
+            // Tags
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+            if (recipe.dietary_tags && Array.isArray(recipe.dietary_tags)) {
+                recipe.dietary_tags.forEach(t => {
+                    // Find chip with data-id t.id
+                    const chip = document.querySelector(`.chip[data-id="${t.id}"]`);
+                    if (chip) chip.classList.add('selected');
+                });
+            }
+
+            window.scrollTo(0, 0);
+        }
+
+        function cancelEdit() {
+            editingRecipeId = null;
+            document.getElementById('recipeForm').reset();
+            document.getElementById('imgPreview').style.display = 'none';
+            document.getElementById('ingredientsList').innerHTML = '';
+            document.getElementById('stepsList').innerHTML = '';
+            addIngredient();
+            addStep();
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+
+            document.getElementById('submitBtn').innerText = "Save to Library";
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            document.querySelector('h1').innerText = "Create Recipe";
+        }
+
+
+        function addIngredient() {
+            const div = document.createElement('div');
+            div.className = 'row';
+            div.innerHTML = `
+                <div style="flex:2"><input type="text" placeholder="Ingredient name" class="ing-name"></div>
+                <div style="flex:1"><input type="number" placeholder="Qty" class="ing-qty"></div>
+                <div style="flex:1">
+                    <select class="ing-unit">
+                        <option value="g">g</option>
+                        <option value="ml">ml</option>
+                        <option value="cup">cup</option>
+                        <option value="tbsp">tbsp</option>
+                        <option value="tsp">tsp</option>
+                    </select>
+                </div>
+                <div style="display:flex; align-items:center;" onclick="this.parentElement.remove()">🗑️</div>
+            `;
+            document.getElementById('ingredientsList').appendChild(div);
+        }
+
+        function addStep() {
+            const div = document.createElement('div');
+            div.style.marginBottom = '10px';
+            const i = createInput(`Enter step...`);
+            i.className = 'step-input';
+            div.appendChild(i);
+            document.getElementById('stepsList').appendChild(div);
+        }
+
+        function toggleTag(el) {
+            el.classList.toggle('selected');
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById('imgPreview');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        document.getElementById('recipeForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const token = document.getElementById('authToken').value.trim();
+            if (!token) return alert("Please enter auth token");
+
+            const formData = new FormData();
+            formData.append('name', document.getElementById('recipeName').value);
+            formData.append('serving_size', document.getElementById('servingSize').value);
+            formData.append('meal_date', document.getElementById('mealDate').value);
+            formData.append('meal_timing', document.getElementById('mealTiming').value);
+
+            // Image
+            const file = document.getElementById('imgInput').files[0];
+            if (file) formData.append('recipe_image', file);
+
+            // Ingredients
+            const ingredients = [];
+            document.querySelectorAll('#ingredientsList .row').forEach(row => {
+                const name = row.querySelector('.ing-name').value;
+                const qty = row.querySelector('.ing-qty').value;
+                const unit = row.querySelector('.ing-unit').value;
+                if (name) ingredients.push({ name, quantity: qty, unit });
+            });
+            formData.append('ingredients', JSON.stringify(ingredients));
+
+            // Nutrition
+            const nutrition = {
+                calories: document.getElementById('cal').value,
+                carbs: document.getElementById('carb').value,
+                protein: document.getElementById('prot').value,
+                fats: document.getElementById('fat').value
+            };
+            formData.append('nutrition_info', JSON.stringify(nutrition));
+
+            // Instructions
+            const steps = [];
+            document.querySelectorAll('.step-input').forEach(i => {
+                if (i.value) steps.push(i.value);
+            });
+            formData.append('instructions', JSON.stringify(steps));
+
+            // Tags (Mock IDs)
+            const tags = [];
+            document.querySelectorAll('.chip.selected').forEach(el => {
+                tags.push(parseInt(el.dataset.id));
+            });
+            formData.append('dietary_tags', JSON.stringify(tags));
+
+            // Send
+            const logBox = document.getElementById('response');
+            logBox.style.display = 'block';
+            logBox.innerText = 'Sending...';
+
+            let url = `${BASE_URL}/add`;
+            let method = 'POST';
+
+            if (editingRecipeId) {
+                url = `${BASE_URL}/edit/${editingRecipeId}`;
+                method = 'PUT';
+            }
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: formData
+                });
+                const data = await res.json();
+                logBox.innerText = JSON.stringify(data, null, 2);
+
+                if (data.status) {
+                    fetchRecipes(); // Refresh list on success
+                    if (editingRecipeId) cancelEdit(); // Reset form if edit mode
+                }
+
+            } catch (err) {
+                logBox.innerText = 'Error: ' + err.message;
+            }
+        };
+
+        async function fetchRecipes() {
+            const token = document.getElementById('authToken').value.trim();
+            if (!token) return;
+
+            const container = document.getElementById('myRecipesList');
+            container.innerHTML = '<div style="text-align:center;">Loading...</div>';
+
+            try {
+                const res = await fetch(`${BASE_URL}/list`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await res.json();
+
+                if (result.status && result.data && Array.isArray(result.data)) {
+                    renderRecipes(result.data);
+                } else {
+                    container.innerHTML = `<div style="text-align:center;">${result.message || 'No recipes found'}</div>`;
+                }
+            } catch (e) {
+                container.innerHTML = `<div style="text-align:center; color:red">Error loading recipes</div>`;
+            }
+        }
+
+        function renderRecipes(recipes) {
+            const container = document.getElementById('myRecipesList');
+            container.innerHTML = '';
+
+            if (recipes.length === 0) {
+                container.innerHTML = `<div style="text-align:center;">No recipes added yet.</div>`;
+                return;
+            }
+
+            recipes.forEach(recipe => {
+                const imgUrl = recipe.image || 'https://via.placeholder.com/80';
+                const cal = recipe.nutrition_info?.calories || 0;
+                const prot = recipe.nutrition_info?.protein || 0;
+                const carbs = recipe.nutrition_info?.carbs || 0;
+                const fats = recipe.nutrition_info?.fats || 0;
+
+                // Get first tag name if available
+                const tag = (recipe.dietary_tags && recipe.dietary_tags[0]) ? recipe.dietary_tags[0].name : '';
+                const tagHtml = tag ? `<span class="chip" style="font-size:0.6rem; padding:2px 6px; margin:0;">${tag}</span>` : '';
+
+                const recipeString = encodeURIComponent(JSON.stringify(recipe));
+
+                const html = `
+                    <div class="recipe-card">
+                        <img src="${imgUrl}" class="recipe-img">
+                        <div class="recipe-info">
+                            <div class="recipe-tags">
+                                ${tagHtml}
+                            </div>
+                            <h3 class="recipe-title">${recipe.name}</h3>
+                            <div class="recipe-user">
+                                <div class="user-avatar" style="background:${getRandomColor()}"></div>
+                                <span>You</span>
+                                <span>🌐 Public</span>
+                            </div>
+                            <div class="nutrition-badges">
+                                <div class="n-badge">🔥 ${cal}kcal</div>
+                                <div class="n-badge">🍗 ${prot}g</div>
+                                <div class="n-badge">🍚 ${carbs}g</div>
+                                <div class="n-badge">🥑 ${fats}g</div>
+                            </div>
+                        </div>
+                        <div class="action-icons">
+                            <span class="icon-btn" onclick="editRecipe('${recipeString}')">✏️</span>
+                            <span class="icon-btn" onclick="deleteRecipe('${recipe.id}')">�️</span>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        // Auto load if token exists in input (e.g. pasted manually)
+        document.getElementById('authToken').addEventListener('change', fetchRecipes);
+
+        async function fetchTags() {
+            try {
+                const res = await fetch(TAGS_URL);
+                const result = await res.json();
+                const container = document.getElementById('dietaryTags');
+
+                if (result.status && result.data) {
+                    const tags = Array.isArray(result.data) ? result.data : (result.data.data || []);
+
+                    container.innerHTML = '';
+                    if (tags.length === 0) {
+                        container.innerHTML = '<div style="color:orange; font-size:0.8rem;">No tags found in DB</div>';
+                        return;
+                    }
+                    tags.forEach(tag => {
+                        const span = document.createElement('span');
+                        span.className = 'chip';
+                        span.onclick = function () { toggleTag(this); };
+                        span.dataset.id = tag.id;
+                        span.innerText = tag.name;
+                        container.appendChild(span);
+                    });
+                } else {
+                    container.innerHTML = '<div style="color:red; font-size:0.8rem;">Failed to load tags. Status false.</div>';
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('dietaryTags').innerHTML = '<div style="color:red; font-size:0.8rem;">Error loading tags</div>';
+            }
+        }
+
+
+    </script>
+
+
+
+
+
+    <!-- Back to Dashboard Button -->
+    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ← Dashboard
+    </a>
+
+</body>
+
+</html>

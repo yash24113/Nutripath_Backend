@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth API Test Dashboard</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --bg: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text: #1F2937;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--primary);
+            font-size: 1.5rem;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            color: #4B5563;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #D1D5DB;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: opacity 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button.secondary {
+            background-color: #E5E7EB;
+            color: var(--text);
+            margin-top: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .nav-links {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #6B7280;
+        }
+
+        .link {
+            color: var(--primary);
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 350px;
+        }
+
+        .status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .success {
+            background-color: #D1FAE5;
+            color: #065F46;
+            border: 1px solid #A7F3D0;
+        }
+
+        .error {
+            background-color: #FEE2E2;
+            color: #991B1B;
+            border: 1px solid #FECACA;
+        }
+
+        .log-container {
+            margin-top: 40px;
+            background: #1F2937;
+            border-radius: 12px;
+            padding: 16px;
+            color: #10B981;
+            font-family: monospace;
+            font-size: 0.85rem;
+            max-width: 450px;
+            width: 100%;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- 1. REGISTER VIEW -->
+        <div class="card" id="viewRegister">
+            <h2>Create Account</h2>
+            <div class="form-group"><label>Full Name</label><input type="text" id="regFullName" value="Test User"></div>
+            <div class="form-group"><label>Email Address</label><input type="email" id="regEmail"
+                    value="test@example.com"></div>
+            <div class="form-group"><label>Password</label><input type="password" id="regPassword" value="Pass@123">
+            </div>
+
+            <button onclick="handleRegister()">Sign Up</button>
+            <div id="regStatus" class="status hidden"></div>
+            <div class="nav-links">Already have an account? <span class="link" onclick="switchView('login')">Log
+                    In</span></div>
+        </div>
+
+        <!-- 2. LOGIN VIEW -->
+        <div class="card hidden" id="viewLogin">
+            <h2>Welcome Back</h2>
+            <div class="form-group"><label>Email Address</label><input type="email" id="loginEmail"></div>
+            <div class="form-group"><label>Password</label><input type="password" id="loginPassword"></div>
+            <button onclick="handleLogin()">Log In</button>
+            <div id="loginStatus" class="status hidden"></div>
+            <div class="nav-links">
+                Don't have an account? <span class="link" onclick="switchView('register')">Sign Up</span><br><br>
+                <span class="link" onclick="switchView('forgot')">Forgot Password?</span>
+            </div>
+        </div>
+
+        <!-- 3. FORGOT PASSWORD VIEW -->
+        <div class="card hidden" id="viewForgot">
+            <h2>Reset Password</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">Enter your email to receive an OTP.</p>
+            <div class="form-group"><label>Email Address</label><input type="email" id="forgotEmail"></div>
+            <button onclick="handleForgot()">Send Reset OTP</button>
+            <div id="forgotStatus" class="status hidden"></div>
+            <div class="nav-links">Remember your password? <span class="link" onclick="switchView('login')">Log
+                    In</span></div>
+        </div>
+
+        <!-- 4. RESET PASSWORD VIEW -->
+        <div class="card hidden" id="viewReset">
+            <h2>Set New Password</h2>
+            <div class="form-group"><label>OTP Code</label><input type="text" id="forgotOtpInput"
+                    placeholder="Enter OTP from email"></div>
+            <button onclick="handleVerifyForgotOtp()" style="background-color: #059669; margin-bottom: 20px;">Verify
+                OTP</button>
+
+            <div id="newPwdFields" class="hidden">
+                <div class="form-group"><label>New Password</label><input type="password" id="newPassword"></div>
+                <div class="form-group"><label>Confirm Password</label><input type="password" id="confirmPassword">
+                </div>
+                <button onclick="handleResetPassword()">Reset Password</button>
+            </div>
+            <button class="secondary" onclick="handleResendForgotOtp()">Resend OTP</button>
+            <div id="resetStatus" class="status hidden"></div>
+            <div class="nav-links"><span class="link" onclick="switchView('login')">Back to Login</span></div>
+        </div>
+
+        <!-- 5. DASHBOARD VIEW (CHANGE PASSWORD) -->
+        <div class="card hidden" id="viewDashboard">
+            <h2>Dashboard</h2>
+            <p style="text-align: center; color: #666; margin-bottom: 20px;">You are logged in.</p>
+
+            <div style="border-top: 1px solid #eee; padding-top: 20px;">
+                <h3 style="margin-top:0; color:#374151; font-size: 1.1rem; text-align:center;">Change Password</h3>
+                <div class="form-group"><label>Old Password</label><input type="password" id="oldPwd"></div>
+                <div class="form-group"><label>New Password</label><input type="password" id="newPwd"></div>
+                <div class="form-group"><label>Confirm New Password</label><input type="password" id="confirmNewPwd">
+                </div>
+                <button onclick="handleChangePassword()">Update Password</button>
+                <div id="changePwdStatus" class="status hidden"></div>
+            </div>
+
+            <!-- PROFILE SECTION -->
+            <div style="border-top: 1px solid #eee; padding-top: 20px; margin-top: 20px;">
+                <h3 style="margin-top:0; color:#374151; font-size: 1.1rem; text-align:center;">Profile Details</h3>
+                <div id="profileView">
+                    <p style="text-align: center; color: #666;">Loading...</p>
+                </div>
+                <button id="btnEditProfile" onclick="showEditProfile()" class="secondary"
+                    style="background:#EEF2FF; color:var(--primary); border:1px solid #C7D2FE;">Edit Profile</button>
+
+                <div id="profileEditForm" class="hidden"
+                    style="margin-top: 20px; background: #F9FAFB; padding: 15px; border-radius: 8px;">
+                    <div class="form-group"><label>Full Name</label><input type="text" id="editFullName"></div>
+                    <div class="form-group"><label>Phone Code</label><input type="text" id="editPhoneCode"></div>
+                    <div class="form-group"><label>Phone Number</label><input type="text" id="editPhoneNumber"></div>
+                    <div class="form-group"><label>Gender</label>
+                        <select id="editGender">
+                            <option value="">Select</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Age</label><input type="number" id="editAge"></div>
+                    <div class="form-group"><label>Address</label><input type="text" id="editAddress"></div>
+                    <div class="form-group"><label>City</label><input type="text" id="editCity"></div>
+                    <div class="form-group"><label>State</label><input type="text" id="editState"></div>
+                    <div class="form-group"><label>Country</label><input type="text" id="editCountry"></div>
+                    <div class="form-group"><label>Postal Code</label><input type="text" id="editPostalCode"></div>
+                    <div class="form-group"><label>Language</label><input type="text" id="editLanguage"></div>
+
+                    <div class="form-group"><label>Profile Image</label><input type="file" id="editProfileImage"></div>
+
+                    <button onclick="handleUpdateProfile()">Save Changes</button>
+                    <button onclick="cancelEditProfile()" class="secondary">Cancel</button>
+                    <div id="profileUpdateStatus" class="status hidden"></div>
+                </div>
+            </div>
+
+            <button class="secondary" onclick="handleLogout()"
+                style="margin-top: 30px; color: #EF4444; border: 1px solid #FCA5A5; background: #FEF2F2;">Log
+                Out</button>
+        </div>
+
+    </div>
+
+    <!-- LOGS -->
+    <div class="log-container">
+        <div style="margin-bottom: 10px; font-weight: bold; border-bottom: 1px solid #374151; padding-bottom: 5px;">API
+            Transaction Logs</div>
+        <pre id="consoleLog">Ready...</pre>
+    </div>
+
+    <!-- OTP MODAL -->
+    <div id="otpModal" class="modal hidden">
+        <div class="modal-content">
+            <h3 style="margin-top:0; text-align: center;">Verify Account</h3>
+            <p style="text-align: center; color: #666;">Enter the OTP sent to your email.</p>
+            <div class="form-group">
+                <input type="text" id="otpInput" placeholder="6-digit OTP"
+                    style="text-align: center; letter-spacing: 5px; font-size: 1.2rem;">
+            </div>
+            <button onclick="handleVerifyOtp()">Verify & Activate</button>
+            <button class="secondary" onclick="handleResendRegisterOtp()">Resend OTP</button>
+            <button class="secondary" onclick="closeModal('otpModal')" style="background: transparent;">Close</button>
+            <div id="otpStatus" class="status hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'https://api-nutripathai.nyusoft.in/api/auth';
+        let currentUserId = null;
+        let currentUserEmail = null;
+        let authToken = null; // Store token for dashboard actions
+
+        // --- NAVIGATION ---
+        function switchView(viewName) {
+            ['viewRegister', 'viewLogin', 'viewForgot', 'viewReset', 'viewDashboard'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById('view' + viewName.charAt(0).toUpperCase() + viewName.slice(1)).classList.remove('hidden');
+            document.querySelectorAll('.status').forEach(el => el.classList.add('hidden'));
+        }
+
+        function log(msg) {
+            const el = document.getElementById('consoleLog');
+            const time = new Date().toLocaleTimeString();
+            const text = typeof msg === 'string' ? msg : JSON.stringify(msg, null, 2);
+            el.innerHTML = `[${time}] ${text}\n` + el.innerHTML;
+            console.log(msg);
+        }
+
+        function showStatus(elementId, msg, isError) {
+            const el = document.getElementById(elementId);
+            el.className = `status ${isError ? 'error' : 'success'}`;
+            el.innerText = msg;
+            el.classList.remove('hidden');
+        }
+
+        async function apiCall(endpoint, body, token = null) {
+            try {
+                const headers = { 'Content-Type': 'application/json' };
+                if (token) headers['Authorization'] = `Bearer ${token}`;
+
+                const res = await fetch(`${BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(body)
+                });
+                const data = await res.json();
+                log({ endpoint, status: res.status, response: data });
+                return { ok: res.ok, data };
+            } catch (err) {
+                log({ endpoint, error: err.message });
+                return { ok: false, data: { message: err.message } };
+            }
+        }
+
+        async function handleRegister() {
+            const body = {
+                full_name: document.getElementById('regFullName').value,
+                email: document.getElementById('regEmail').value,
+                password: document.getElementById('regPassword').value
+            };
+            currentUserEmail = body.email;
+            showStatus('regStatus', 'Registering...', false);
+            const { ok, data } = await apiCall('/register', body);
+            if (ok) {
+                currentUserId = data.data.userId;
+                showStatus('regStatus', '', false);
+                document.getElementById('otpModal').classList.remove('hidden');
+                document.getElementById('loginEmail').value = body.email;
+            } else {
+                showStatus('regStatus', data.message || 'Error registering', true);
+            }
+        }
+
+        async function handleVerifyOtp() {
+            const otp = document.getElementById('otpInput').value;
+            if (!currentUserId || !otp) return alert("Missing ID or OTP.");
+            const { ok, data } = await apiCall('/verify-otp', { userId: currentUserId, otp_code: otp });
+            if (ok) {
+                showStatus('otpStatus', 'Verified! Redirecting...', false);
+                setTimeout(() => {
+                    closeModal('otpModal');
+                    switchView('login');
+                    document.getElementById('loginStatus').classList.remove('hidden');
+                    document.getElementById('loginStatus').innerHTML = "<span style='color:green'>Account verified. Please login.</span>";
+                }, 1500);
+            } else {
+                showStatus('otpStatus', data.message, true);
+            }
+        }
+
+        async function handleResendRegisterOtp() {
+            if (!currentUserEmail) return alert("Email missing");
+            const { ok, data } = await apiCall('/resend-register-otp', { email: currentUserEmail });
+            if (ok) showStatus('otpStatus', 'OTP resent.', false);
+            else showStatus('otpStatus', data.message, true);
+        }
+
+        async function handleLogin() {
+            const body = {
+                email: document.getElementById('loginEmail').value,
+                password: document.getElementById('loginPassword').value
+            };
+            const { ok, data } = await apiCall('/login', body);
+            if (ok) {
+                authToken = data.data.token;
+                log("Auth Token: " + authToken);
+                log("Auth Token: " + authToken);
+                currentUserId = data.data.userId || data.data.id; // Ensure we get ID
+                switchView('dashboard'); // GO TO DASHBOARD
+                loadProfile();
+            }
+            else showStatus('loginStatus', data.message, true);
+        }
+
+        async function handleForgot() {
+            const email = document.getElementById('forgotEmail').value;
+            if (!email) return alert("Enter email");
+            currentUserEmail = email;
+            const { ok, data } = await apiCall('/forgot-password', { email });
+            if (ok) {
+                currentUserId = data.data.userId;
+                switchView('reset');
+                showStatus('resetStatus', `OTP sent to ${email}`, false);
+            } else {
+                showStatus('forgotStatus', data.message, true);
+            }
+        }
+
+        async function handleVerifyForgotOtp() {
+            const otp = document.getElementById('forgotOtpInput').value;
+            if (!currentUserId || !otp) return alert("Missing ID or OTP.");
+            const { ok, data } = await apiCall('/verify-forgot-otp', { userId: currentUserId, otp_code: otp });
+            if (ok) {
+                showStatus('resetStatus', 'OTP Verified.', false);
+                document.getElementById('newPwdFields').classList.remove('hidden');
+                document.getElementById('forgotOtpInput').disabled = true;
+            } else {
+                showStatus('resetStatus', data.message, true);
+            }
+        }
+
+        async function handleResendForgotOtp() {
+            if (!currentUserEmail) return alert("Email missing");
+            const { ok, data } = await apiCall('/resend-forgot-otp', { email: currentUserEmail });
+            if (ok) showStatus('resetStatus', 'OTP resent.', false);
+            else showStatus('resetStatus', data.message, true);
+        }
+
+        async function loadProfile() {
+            if (!currentUserId || !authToken) return;
+            document.getElementById('profileView').innerHTML = '<p style="text-align: center;">Loading...</p>';
+
+            try {
+                const res = await fetch(`${BASE_URL}/profile/${currentUserId}`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await res.json();
+                log({ endpoint: `/profile/${currentUserId}`, status: res.status, response: data });
+
+                if (data.status || res.ok) {
+                    renderProfile(data.data);
+                } else {
+                    document.getElementById('profileView').innerHTML = `<p style="color:red">Failed to load: ${data.message}</p>`;
+                }
+            } catch (e) {
+                log("Profile Load Error: " + e.message);
+            }
+        }
+
+        let loadedProfileData = {};
+
+        function renderProfile(user) {
+            loadedProfileData = user;
+            const html = `
+                <div style="display:flex; align-items:center; gap:15px; margin-bottom:15px;">
+                    <img src="${user.profile_image || 'https://via.placeholder.com/60'}" style="width:60px; height:60px; border-radius:50%; object-fit:cover; border:1px solid #ddd;">
+                    <div>
+                        <div style="font-weight:bold; font-size:1.1rem;">${user.full_name || 'No Name'}</div>
+                        <div style="color:#666; font-size:0.9rem;">${user.email}</div>
+                    </div>
+                </div>
+                <div style="font-size:0.9rem; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div><strong>Phone:</strong> ${user.phone_code ? '+' + user.phone_code : ''} ${user.phone_number || '-'}</div>
+                    <div><strong>Gender:</strong> ${user.gender || '-'}</div>
+                    <div><strong>Age:</strong> ${user.age || '-'}</div>
+                    <div><strong>Location:</strong> ${[user.city, user.country].filter(Boolean).join(', ') || '-'}</div>
+                    <div><strong>Language:</strong> ${user.language || '-'}</div>
+                </div>
+            `;
+            document.getElementById('profileView').innerHTML = html;
+        }
+
+        function showEditProfile() {
+            document.getElementById('profileEditForm').classList.remove('hidden');
+            document.getElementById('btnEditProfile').classList.add('hidden');
+
+            // Pre-fill
+            const p = loadedProfileData;
+            document.getElementById('editFullName').value = p.full_name || '';
+            document.getElementById('editPhoneCode').value = p.phone_code || '';
+            document.getElementById('editPhoneNumber').value = p.phone_number || '';
+            document.getElementById('editGender').value = (p.gender || '').toLowerCase();
+            document.getElementById('editAge').value = p.age || '';
+            document.getElementById('editAddress').value = p.address || '';
+            document.getElementById('editCity').value = p.city || '';
+            document.getElementById('editState').value = p.state || '';
+            document.getElementById('editCountry').value = p.country || '';
+            document.getElementById('editPostalCode').value = p.postal_code || '';
+            document.getElementById('editLanguage').value = p.language || '';
+        }
+
+        function cancelEditProfile() {
+            document.getElementById('profileEditForm').classList.add('hidden');
+            document.getElementById('btnEditProfile').classList.remove('hidden');
+            showStatus('profileUpdateStatus', '', false);
+            document.getElementById('profileUpdateStatus').classList.add('hidden');
+        }
+
+        async function handleUpdateProfile() {
+            if (!currentUserId || !authToken) return;
+
+            showStatus('profileUpdateStatus', 'Saving...', false);
+
+            const formData = new FormData();
+            formData.append('full_name', document.getElementById('editFullName').value);
+            formData.append('phone_code', document.getElementById('editPhoneCode').value);
+            formData.append('phone_number', document.getElementById('editPhoneNumber').value);
+            formData.append('gender', document.getElementById('editGender').value);
+            formData.append('age', document.getElementById('editAge').value);
+            formData.append('address', document.getElementById('editAddress').value);
+            formData.append('city', document.getElementById('editCity').value);
+            formData.append('state', document.getElementById('editState').value);
+            formData.append('country', document.getElementById('editCountry').value);
+            formData.append('postal_code', document.getElementById('editPostalCode').value);
+            formData.append('language', document.getElementById('editLanguage').value);
+
+            const fileInput = document.getElementById('editProfileImage');
+            if (fileInput.files[0]) {
+                formData.append('profile_image', fileInput.files[0]);
+            }
+
+            try {
+                const res = await fetch(`${BASE_URL}/profile/${currentUserId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                        // Content-Type not set for FormData
+                    },
+                    body: formData
+                });
+                const data = await res.json();
+                log({ endpoint: `/profile/${currentUserId} (PUT)`, status: res.status, response: data });
+
+                if (res.ok || data.status) {
+                    showStatus('profileUpdateStatus', 'Profile Updated!', false);
+                    renderProfile(data.data); // Update view with new data
+                    setTimeout(cancelEditProfile, 1500);
+                } else {
+                    showStatus('profileUpdateStatus', data.message || 'Update failed', true);
+                }
+            } catch (e) {
+                showStatus('profileUpdateStatus', e.message, true);
+                log("Profile Update Error: " + e.message);
+            }
+        }
+
+        async function handleResetPassword() {
+            const password = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+            if (!currentUserId) return alert("User ID missing");
+            const { ok, data } = await apiCall('/reset-password', {
+                userId: currentUserId,
+                password,
+                confirm_password: confirm
+            });
+            if (ok) {
+                showStatus('resetStatus', 'Password Changed!', false);
+                setTimeout(() => {
+                    switchView('login');
+                    document.getElementById('loginEmail').value = currentUserEmail;
+                }, 1500);
+            } else {
+                showStatus('resetStatus', data.message, true);
+            }
+        }
+
+        // --- CHANGE PASSWORD (DASHBOARD) ---
+        async function handleChangePassword() {
+            const oldPassword = document.getElementById('oldPwd').value;
+            const newPassword = document.getElementById('newPwd').value;
+            const confirmPassword = document.getElementById('confirmNewPwd').value;
+
+            if (!authToken) return alert("Not logged in!");
+
+            const body = { oldPassword, newPassword, confirmPassword };
+            const { ok, data } = await apiCall('/change-password', body, authToken);
+
+            if (ok) {
+                showStatus('changePwdStatus', 'Password successfully updated!', false);
+                // Clear fields
+                document.getElementById('oldPwd').value = '';
+                document.getElementById('newPwd').value = '';
+                document.getElementById('confirmNewPwd').value = '';
+            } else {
+                showStatus('changePwdStatus', data.message || 'Error changing password', true);
+            }
+        }
+
+        async function handleLogout() {
+            if (authToken) {
+                await apiCall('/logout', {}, authToken);
+            }
+            authToken = null;
+            switchView('login');
+            document.getElementById('loginStatus').innerText = "Logged out successfully.";
+            document.getElementById('loginStatus').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+    </script>
+
+
+
+
+    <!-- Back to Dashboard Button -->
+    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ← Dashboard
+    </a>
+
+</body>
+
+</html>

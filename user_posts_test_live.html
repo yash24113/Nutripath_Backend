@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Posts Test</title>
+    <!-- Import Google Fonts for a more premium look -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            /* Mobile-like width */
+            margin: 0 auto;
+            background: #f0f2f5;
+            color: #1c1e21;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1.25rem;
+        }
+
+        /* Form Styles */
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        input[type="text"],
+        textarea,
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        button.primary-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            width: 100%;
+        }
+
+        button.primary-btn:hover {
+            background: #0056b3;
+        }
+
+        /* Post Card Styles */
+        .post-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+            padding: 16px;
+        }
+
+        /* Header: User Info & Follow */
+        .post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
+        }
+
+        .user-details {
+            line-height: 1.2;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #050505;
+        }
+
+        .post-time {
+            font-size: 0.8rem;
+            color: #65676b;
+        }
+
+        .follow-btn {
+            background: #198754;
+            /* Green like screenshot */
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .following-btn {
+            background: #e4e6eb;
+            color: #050505;
+        }
+
+        /* Content */
+        .post-image {
+            width: 100%;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            display: block;
+            object-fit: cover;
+            max-height: 500px;
+        }
+
+        .post-description {
+            font-size: 0.95rem;
+            color: #050505;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        /* Stats */
+        .post-stats {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: #65676b;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #ced0d4;
+        }
+
+        /* Footer Actions */
+        .post-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-pill {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background: #f0f2f5;
+            padding: 8px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #65676b;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .action-pill:hover {
+            background: #e4e6eb;
+        }
+
+        /* Edit/Delete Controls */
+        .manage-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 0.8em;
+        }
+
+        .text-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            color: #65676b;
+        }
+
+        .text-btn:hover {
+            text-decoration: underline;
+            color: #007bff;
+        }
+
+        .text-btn.delete:hover {
+            color: #dc3545;
+        }
+
+        /* Utility */
+        .hidden {
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 100px auto;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 12px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        /* Likes List Styles */
+        .likes-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .like-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f2f5;
+        }
+
+        .like-item:last-child {
+            border-bottom: none;
+        }
+
+        .like-user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .like-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .like-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        /* Comments Styles */
+        .comment-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .comment-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .comment-content {
+            background: #f0f2f5;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        .comment-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 2px;
+        }
+
+        .comment-text {
+            color: #050505;
+        }
+
+        .comment-time {
+            font-size: 0.75rem;
+            color: #65676b;
+            margin-left: 5px;
+            margin-top: 2px;
+        }
+
+        /* Share Modal Styles */
+        .share-options {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .share-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: none;
+            background: none;
+            cursor: pointer;
+            gap: 5px;
+        }
+
+        .share-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: white;
+        }
+
+        .share-whatsapp .share-icon {
+            background: #25D366;
+        }
+
+        .share-email .share-icon {
+            background: #EA4335;
+        }
+
+        .share-label {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Config & Auth Toggle -->
+    <div style="text-align: right; margin-bottom: 10px;">
+        <button onclick="toggleConfig()" style="background:none; border:none; color:#65676b; cursor:pointer;">⚙️
+            Settings</button>
+    </div>
+
+    <div id="configSection" class="hidden">
+        <div class="card">
+            <h2>Configuration & Auth</h2>
+            <div class="input-group">
+                <label>API Base URL</label>
+                <input type="text" id="apiBase" value="https://api-nutripathai.nyusoft.in/api/user-posts">
+            </div>
+            <div class="input-group">
+                <label>Auth Token (Bearer)</label>
+                <input type="text" id="authToken" placeholder="Paste your JWT token here">
+            </div>
+            <button onclick="saveToken()" class="primary-btn">Save & Reload</button>
+            <p id="token-status" style="margin-top:10px; font-size:0.8rem;"></p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Create Post</h2>
+        <form id="createPostForm">
+            <div class="input-group">
+                <textarea id="postDesc" rows="3" placeholder="What's on your mind?" required></textarea>
+            </div>
+            <div class="input-group">
+                <input type="file" id="postImage" accept="image/*" required>
+            </div>
+            <button type="submit" class="primary-btn">Publish Post</button>
+        </form>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+        <h2 style="margin:0">Feed</h2>
+        <button onclick="loadPosts()"
+            style="background:none; border:none; color:#007bff; cursor:pointer;">Refresh</button>
+    </div>
+
+    <div id="postsContainer">
+        <p style="text-align:center; color:#65676b">Loading posts...</p>
+    </div>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <h3>Edit Post</h3>
+            <input type="hidden" id="editPostId">
+            <div class="input-group">
+                <label>Description</label>
+                <textarea id="editPostDesc" rows="3"></textarea>
+            </div>
+            <div class="input-group">
+                <label>Change Image (Optional)</label>
+                <input type="file" id="editPostImage" accept="image/*">
+            </div>
+            <div class="btn-group">
+                <button onclick="submitEdit()" class="primary-btn">Save Changes</button>
+                <button onclick="closeModal()" class="primary-btn"
+                    style="background:#e4e6eb; color:black;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Likes Modal -->
+    <div id="likesModal" class="modal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0">Likes</h3>
+                <button onclick="closeLikesModal()"
+                    style="border:none; background:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <div id="likesListContainer" class="likes-list">
+                <p style="text-align:center;">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Comments Modal -->
+    <div id="commentsModal" class="modal">
+        <div class="modal-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h3 style="margin:0">Comments</h3>
+                <button onclick="closeCommentsModal()"
+                    style="border:none; background:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+            </div>
+            <div id="commentsListContainer" class="likes-list">
+                <p style="text-align:center;">Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Comment Modal -->
+    <div id="addCommentModal" class="modal">
+        <div class="modal-content">
+            <h3>Add Comment</h3>
+            <input type="hidden" id="commentPostId">
+            <div class="input-group">
+                <textarea id="commentText" rows="3" placeholder="Write a comment..."></textarea>
+            </div>
+            <div class="btn-group">
+                <button onclick="submitComment()" class="primary-btn">Post</button>
+                <button onclick="closeAddCommentModal()" class="primary-btn"
+                    style="background:#e4e6eb; color:black;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Share Modal -->
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <h3 style="text-align:center;">Share via</h3>
+            <input type="hidden" id="sharePostId">
+            <input type="hidden" id="sharePostDesc">
+            <input type="hidden" id="sharePostImage">
+
+            <div class="share-options">
+                <button class="share-btn share-whatsapp" onclick="performShare('whatsapp')">
+                    <div class="share-icon">💬</div>
+                    <span class="share-label">WhatsApp</span>
+                </button>
+                <button class="share-btn share-email" onclick="performShare('email')">
+                    <div class="share-icon">✉️</div>
+                    <span class="share-label">Email</span>
+                </button>
+            </div>
+
+            <button onclick="closeShareModal()" class="primary-btn"
+                style="background:#e4e6eb; color:black; margin-top:10px;">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        function toggleConfig() {
+            const el = document.getElementById('configSection');
+            el.classList.toggle('hidden');
+        }
+
+        function getApiBase() {
+            return document.getElementById('apiBase').value.replace(/\/$/, '');
+        }
+
+        // Load stored settings
+        const storedBase = localStorage.getItem('user_post_api_base');
+        if (storedBase) document.getElementById('apiBase').value = storedBase;
+
+        let token = localStorage.getItem('user_post_token') || '';
+        if (token) {
+            document.getElementById('authToken').value = token;
+            document.getElementById('token-status').innerText = 'Token loaded';
+            setTimeout(loadPosts, 500);
+        } else {
+            document.getElementById('configSection').classList.remove('hidden');
+        }
+
+        function saveToken() {
+            const apiBase = document.getElementById('apiBase').value;
+            token = document.getElementById('authToken').value.trim();
+            localStorage.setItem('user_post_api_base', apiBase);
+            localStorage.setItem('user_post_token', token);
+            document.getElementById('token-status').innerText = 'Settings saved!';
+            loadPosts();
+        }
+
+        function getHeaders() {
+            return { 'Authorization': `Bearer ${token}` };
+        }
+
+        function timeAgo(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const seconds = Math.floor((now - date) / 1000);
+
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + " years ago";
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + " months ago";
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + " days ago";
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + " hours ago";
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + " minutes ago";
+            return "Just now";
+        }
+
+        async function loadPosts() {
+            if (!token) return;
+            const container = document.getElementById('postsContainer');
+
+            try {
+                const res = await fetch(`${getApiBase()}/view?page=1&limit=5`, { headers: getHeaders() });
+                const data = await res.json();
+
+                if (data.status && data.data) {
+                    // Handle new pagination structure or old array structure fallback
+                    const posts = Array.isArray(data.data) ? data.data : (data.data.posts || []);
+                    renderPosts(posts);
+                } else {
+                    container.innerHTML = `<p style="color:red; text-align:center;">Error: ${data.message}</p>`;
+                }
+            } catch (e) {
+                container.innerHTML = `<p style="color:red; text-align:center;">Failed to load posts: ${e.message}</p>`;
+            }
+        }
+
+        function renderPosts(posts) {
+            const container = document.getElementById('postsContainer');
+            container.innerHTML = '';
+
+            if (posts.length === 0) {
+                container.innerHTML = '<p style="text-align:center;">No posts yet.</p>';
+                return;
+            }
+
+            posts.forEach(post => {
+                const userIcon = (post.user_details && post.user_details.profile_icon) || 'https://via.placeholder.com/40';
+                const firstName = (post.user_details && post.user_details.first_name) || 'User';
+                const lastName = (post.user_details && post.user_details.last_name) || '';
+                const fullName = `${firstName} ${lastName}`.trim();
+
+                const timeString = timeAgo(post.inserted_at);
+
+                const followBtn = post.is_follow
+                    ? `<button class="follow-btn following-btn" onclick="toggleFollow('${post.user_id}', this)">Following</button>`
+                    : `<button class="follow-btn" onclick="toggleFollow('${post.user_id}', this)">Follow</button>`;
+
+                const html = `
+                    <div class="post-card" id="post-${post.id}">
+                        <!-- Header -->
+                        <div class="post-header">
+                            <div class="user-profile">
+                                <img src="${userIcon}" class="user-avatar" onerror="this.src='https://via.placeholder.com/40'">
+                                <div class="user-details">
+                                    <div class="user-name">${fullName}</div>
+                                    <div class="post-time">${timeString}</div>
+                                </div>
+                            </div>
+                            ${followBtn}
+                        </div>
+
+                        <!-- Image -->
+                         ${post.post_image ? `<img src="${post.post_image}" class="post-image">` : ''}
+
+                        <!-- Description -->
+                        <div class="post-description">${escapeHtml(post.post_description)}</div>
+
+                        <!-- Stats -->
+                        <div class="post-stats">
+                            <span onclick="openLikesModal('${post.id}')" style="cursor:pointer; font-weight:500;">
+                                ${post.likes_count || 0} likes
+                            </span>
+                            <span onclick="openCommentsModal('${post.id}')" style="cursor:pointer;">${post.comments_count || 0} comments</span>
+                            <span>${post.shares_count || 0} shares</span>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="post-actions">
+                            <button class="action-pill" onclick="likePost('${post.id}')" style="${post.is_liked ? 'color: red;' : ''}">
+                                ${post.is_liked ? '❤️ Liked' : '🤍 Like'}
+                            </button>
+                            <button class="action-pill" onclick="openAddCommentModal('${post.id}')">💬 Comment</button>
+                            <button class="action-pill" onclick="openShareModal('${post.id}')">↗️ Share</button>
+                        </div>
+
+                        <!-- Admin Actions -->
+                        <div class="manage-actions">
+                             <button class="text-btn" onclick="openEdit('${post.id}', '${escapeHtml(post.post_description)}')">Edit Post</button>
+                             <button class="text-btn delete" onclick="deletePost('${post.id}')">Delete</button>
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        document.getElementById('createPostForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const desc = document.getElementById('postDesc').value;
+            const file = document.getElementById('postImage').files[0];
+
+            if (!token) return alert("Please set token first");
+
+            const formData = new FormData();
+            formData.append('post_description', desc);
+            formData.append('post_image', file);
+
+            try {
+                const res = await fetch(`${getApiBase()}/add`, {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.status) {
+                    // alert('Post created!'); // Removed alert for smoother XP
+                    document.getElementById('createPostForm').reset();
+                    loadPosts();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (e) {
+                alert('Request failed');
+            }
+        };
+
+        async function deletePost(id) {
+            if (!confirm("Delete this post?")) return;
+
+            try {
+                const res = await fetch(`${getApiBase()}/delete/${id}`, {
+                    method: 'DELETE',
+                    headers: getHeaders()
+                });
+                const data = await res.json();
+                if (data.status) {
+                    loadPosts();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (e) {
+                alert('Delete failed');
+            }
+        }
+
+        async function likePost(id) {
+            try {
+                const res = await fetch(`${getApiBase()}/like/${id}`, {
+                    method: 'POST',
+                    headers: getHeaders()
+                });
+                const data = await res.json();
+                if (data.status) {
+                    loadPosts();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (e) {
+                console.error("Like failed", e);
+                alert('Like action failed');
+            }
+        }
+
+        // Likes Modal Functions
+        async function openLikesModal(postId) {
+            document.getElementById('likesModal').style.display = 'block';
+            const container = document.getElementById('likesListContainer');
+            container.innerHTML = '<p style="text-align:center;">Loading...</p>';
+
+            try {
+                const res = await fetch(`${getApiBase()}/likes/${postId}`, { headers: getHeaders() });
+                const data = await res.json();
+
+                if (data.status && data.data) {
+                    renderLikesList(data.data);
+                } else {
+                    container.innerHTML = `<p style="text-align:center;">Error loading likes.</p>`;
+                }
+            } catch (e) {
+                container.innerHTML = `<p style="text-align:center;">Failed to load.</p>`;
+            }
+        }
+
+        function closeLikesModal() {
+            document.getElementById('likesModal').style.display = 'none';
+        }
+
+        function renderLikesList(users) {
+            const container = document.getElementById('likesListContainer');
+            if (users.length === 0) {
+                container.innerHTML = '<p style="text-align:center;">No likes yet.</p>';
+                return;
+            }
+
+            container.innerHTML = users.map(user => {
+                const userIcon = user.profile_image || 'https://via.placeholder.com/40';
+                const fullName = `${user.first_name} ${user.last_name}`;
+
+                // Don't show follow button for self
+                let followBtn = '';
+                if (!user.is_self) {
+                    const btnClass = user.is_follow ? 'follow-btn following-btn' : 'follow-btn';
+                    const btnText = user.is_follow ? 'Following' : 'Follow';
+                    followBtn = `<button class="${btnClass}" onclick="toggleFollow('${user.user_id}', this)">${btnText}</button>`;
+                }
+
+                return `
+                    <div class="like-item">
+                        <div class="like-user-info">
+                            <img src="${userIcon}" class="like-avatar" onerror="this.src='https://via.placeholder.com/40'">
+                            <span class="like-name">${fullName}</span>
+                        </div>
+                        ${followBtn}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Global function for toggle with button ref
+        async function toggleFollow(userId, btn) {
+            // Optimistic update
+            const isFollowing = btn.classList.contains('following-btn');
+            const originalText = btn.innerText;
+            const originalClass = btn.className;
+
+            // Toggle state immediately
+            if (isFollowing) {
+                btn.className = 'follow-btn';
+                btn.innerText = 'Follow';
+            } else {
+                btn.className = 'follow-btn following-btn';
+                btn.innerText = 'Following';
+            }
+
+            try {
+                const res = await fetch(`${getApiBase()}/follow/${userId}`, {
+                    method: 'POST',
+                    headers: getHeaders()
+                });
+                const data = await res.json();
+
+                if (!data.status) {
+                    // Revert on error
+                    btn.className = originalClass;
+                    btn.innerText = originalText;
+                    alert("Action failed: " + data.message);
+                }
+            } catch (e) {
+                btn.className = originalClass;
+                btn.innerText = originalText;
+                alert("Network error");
+            }
+        }
+
+        // --- Comment Functions ---
+        async function openCommentsModal(postId) {
+            document.getElementById('commentsModal').style.display = 'block';
+            const container = document.getElementById('commentsListContainer');
+            container.innerHTML = '<p style="text-align:center;">Loading...</p>';
+
+            try {
+                const res = await fetch(`${getApiBase()}/comments/${postId}`, { headers: getHeaders() });
+                const data = await res.json();
+                if (data.status && data.data) {
+                    renderComments(data.data);
+                } else {
+                    container.innerHTML = `<p style="text-align:center;">Error loading comments.</p>`;
+                }
+            } catch (e) { container.innerHTML = `<p style="text-align:center;">Failed to load.</p>`; }
+        }
+
+        function closeCommentsModal() { document.getElementById('commentsModal').style.display = 'none'; }
+
+        function renderComments(comments) {
+            const container = document.getElementById('commentsListContainer');
+            if (comments.length === 0) {
+                container.innerHTML = '<p style="text-align:center;">No comments yet.</p>';
+                return;
+            }
+            container.innerHTML = comments.map(c => {
+                const icon = c.user_details.profile_image || 'https://via.placeholder.com/32';
+                const name = `${c.user_details.first_name} ${c.user_details.last_name}`;
+                const time = timeAgo(c.inserted_at);
+
+                return `
+                    <div class="comment-item">
+                        <img src="${icon}" class="comment-avatar">
+                        <div>
+                            <div class="comment-content">
+                                <div class="comment-name">${name}</div>
+                                <span class="comment-text">${escapeHtml(c.comment)}</span>
+                            </div>
+                            <div class="comment-time">${time}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openAddCommentModal(postId) {
+            document.getElementById('commentPostId').value = postId;
+            document.getElementById('commentText').value = '';
+            document.getElementById('addCommentModal').style.display = 'block';
+            document.getElementById('commentText').focus();
+        }
+        function closeAddCommentModal() { document.getElementById('addCommentModal').style.display = 'none'; }
+
+        async function submitComment() {
+            const postId = document.getElementById('commentPostId').value;
+            const text = document.getElementById('commentText').value;
+            if (!text.trim()) return alert("Enter comment");
+
+            try {
+                const res = await fetch(`${getApiBase()}/comment/${postId}`, {
+                    method: 'POST',
+                    headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ comment: text })
+                });
+                const data = await res.json();
+                if (data.status) {
+                    closeAddCommentModal();
+                    loadPosts(); // Refresh to update count
+                    // Optional: open comments view immediately
+                    // openCommentsModal(postId); 
+                } else {
+                    alert("Error: " + data.message);
+                }
+            } catch (e) { alert("Failed to post comment"); }
+        }
+
+        // --- Share Functions ---
+        function openShareModal(postId) {
+            // Find post data from DOM
+            const card = document.getElementById(`post-${postId}`);
+            const desc = card.querySelector('.post-description').innerText;
+            const imgEl = card.querySelector('.post-image');
+            const imgUrl = imgEl ? imgEl.src : '';
+
+            document.getElementById('sharePostId').value = postId;
+            document.getElementById('sharePostDesc').value = desc;
+            document.getElementById('sharePostImage').value = imgUrl;
+
+            document.getElementById('shareModal').style.display = 'block';
+        }
+
+        function closeShareModal() {
+            document.getElementById('shareModal').style.display = 'none';
+        }
+
+        async function performShare(platform) {
+            const id = document.getElementById('sharePostId').value;
+            const desc = document.getElementById('sharePostDesc').value;
+            const imgUrl = document.getElementById('sharePostImage').value;
+
+            let url = '';
+            const shareText = `${desc}\n${imgUrl}`;
+
+            if (platform === 'whatsapp') {
+                url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+            } else if (platform === 'email') {
+                url = `mailto:?subject=Check out this post&body=${encodeURIComponent(shareText)}`;
+            }
+
+            // Open share link
+            if (url) window.open(url, '_blank');
+
+            // Record Share to Backend
+            try {
+                const res = await fetch(`${getApiBase()}/share/${id}`, {
+                    method: 'POST',
+                    headers: { ...getHeaders(), 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ platform: platform })
+                });
+                const data = await res.json();
+                if (data.status) {
+                    closeShareModal();
+                    loadPosts(); // Refresh count
+                }
+            } catch (e) { console.error("Share tracking failed"); }
+        }
+
+        // Edit functions
+        function openEdit(id, currentDesc) {
+            document.getElementById('editPostId').value = id;
+            document.getElementById('editPostDesc').value = currentDesc;
+            document.getElementById('editModal').style.display = 'block';
+        }
+        function closeModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+        async function submitEdit() {
+            const id = document.getElementById('editPostId').value;
+            const desc = document.getElementById('editPostDesc').value;
+            const file = document.getElementById('editPostImage').files[0];
+            const formData = new FormData();
+            formData.append('post_description', desc);
+            if (file) formData.append('post_image', file);
+
+            try {
+                const res = await fetch(`${getApiBase()}/edit/${id}`, {
+                    method: 'PUT',
+                    headers: getHeaders(),
+                    body: formData
+                });
+                const data = await res.json();
+                if (data.status) {
+                    closeModal();
+                    loadPosts();
+                } else { alert('Error: ' + data.message); }
+            } catch (e) { alert('Update failed'); }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return "";
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+    </script>
+
+
+
+
+    <!-- Back to Dashboard Button -->
+    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ← Dashboard
+    </a>
+
+</body>
+
+</html>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Token Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        button {
+            margin: 10px;
+            padding: 12px 24px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            background-color: #4285f4;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        #googleBtn {
+            background-color: #DB4437;
+        }
+
+        #appleBtn {
+            background-color: #000000;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: left;
+            background-color: #f9f9f9;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            display: none;
+        }
+
+        .copy-btn {
+            background-color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Firebase Social Login Tester</h1>
+    <p>Use the buttons below to test social login and generate tokens for API testing.</p>
+    
+    <div>
+        <button id="googleBtn">
+            <i class="fab fa-google"></i> Sign in with Google
+        </button>
+        <button id="appleBtn">
+            <i class="fab fa-apple"></i> Sign in with Apple
+        </button>
+    </div>
+
+    <div id="result">
+        <h3>Login Successful!</h3>
+        <p><strong>Provider:</strong> <span id="provider"></span></p>
+        <p><strong>User ID:</strong> <span id="userId"></span></p>
+        <p><strong>Email:</strong> <span id="email"></span></p>
+        <p><strong>Name:</strong> <span id="name"></span></p>
+        <p><strong>Profile Image:</strong> <span id="photoUrl"></span></p>
+        <p><strong>Access Token:</strong> <span id="accessToken"></span></p>
+        <p><strong>ID Token:</strong> <span id="idToken"></span></p>
+        
+        <h4>Test API Request</h4>
+        <pre id="apiRequest"></pre>
+        
+        <button id="copyBtn" class="copy-btn">Copy API Request</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script>
+        // Initialize Firebase with your config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAnJVcqFY6EUKiYV6aXY2iln7lzf5CIj4o",
+            authDomain: "nuatripathai.firebaseapp.com",
+            projectId: "nuatripathai",
+            appId: "1:729312428466:web:aa3181f5c8a5b59c3c24ab"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const providerGoogle = new firebase.auth.GoogleAuthProvider();
+        const providerApple = new firebase.auth.OAuthProvider('apple.com');
+
+        // Add scopes for Apple
+        providerApple.addScope('email');
+        providerApple.addScope('name');
+
+        // Handle Google Sign-in
+        document.getElementById('googleBtn').addEventListener('click', () => {
+            signInWithProvider(providerGoogle, 'google');
+        });
+
+        // Handle Apple Sign-in
+        document.getElementById('appleBtn').addEventListener('click', () => {
+            signInWithProvider(providerApple, 'apple');
+        });
+
+        // Handle Copy button
+        document.getElementById('copyBtn').addEventListener('click', copyToClipboard);
+
+        // Sign in with provider
+        async function signInWithProvider(provider, providerName) {
+            try {
+                const result = await firebase.auth().signInWithPopup(provider);
+                const user = result.user;
+                const idToken = await user.getIdToken();
+                const accessToken = user.accessToken || '';
+                
+                // Display user info
+                document.getElementById('provider').textContent = providerName;
+                document.getElementById('userId').textContent = user.uid;
+                document.getElementById('email').textContent = user.email || 'Not provided';
+                document.getElementById('name').textContent = user.displayName || 'Not provided';
+                document.getElementById('photoUrl').textContent = user.photoURL || 'Not provided';
+                document.getElementById('accessToken').textContent = accessToken || 'Not available';
+                document.getElementById('idToken').textContent = idToken;
+                
+                // Generate API request example
+                const apiRequest = {
+                    url: `${window.location.origin}/api/v1/social-auth/login`,
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        provider: providerName,
+                        idToken: idToken,
+                        accessToken: accessToken,
+                        refreshToken: user.refreshToken || ''
+                    }, null, 2)
+                };
+                
+                document.getElementById('apiRequest').textContent = JSON.stringify(apiRequest, null, 2);
+                document.getElementById('result').style.display = 'block';
+                
+                // Log to console for debugging
+                console.log('User:', user);
+                console.log('ID Token:', idToken);
+                console.log('Access Token:', accessToken);
+                
+            } catch (error) {
+                console.error('Authentication error:', error);
+                alert(`Error during ${providerName} sign in: ${error.message}`);
+            }
+        }
+
+        // Copy to clipboard function
+        function copyToClipboard() {
+            const apiRequest = document.getElementById('apiRequest').textContent;
+            navigator.clipboard.writeText(apiRequest).then(() => {
+                alert('API request copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard. Please copy manually.');
+            });
+        }
+    </script>
+
+
+
+
+    <!-- Back to Dashboard Button -->
+    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ← Dashboard
+    </a>
+
+</body>
+</html>

@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding Wizard Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f9fafb;
+            padding: 20px;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            min-height: 600px;
+            position: relative;
+        }
+
+        /* Headers */
+        h2 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #333;
+            margin-right: 15px;
+        }
+
+        .progress-track {
+            flex: 1;
+            height: 6px;
+            background: #eee;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #10B981;
+            width: 25%;
+            transition: width 0.3s;
+        }
+
+        .step-count {
+            margin-left: 15px;
+            font-size: 0.85rem;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* Steps */
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+            animation: fadeIn 0.4s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 0.95rem;
+            background: #fafafa;
+        }
+
+        .input:focus {
+            outline: none;
+            border-color: #10B981;
+            background: white;
+        }
+
+        textarea.input {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Selectable Cards (Goals, Activities) */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .card-option {
+            border: 2px solid #eee;
+            border-radius: 12px;
+            padding: 15px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .card-option:hover {
+            border-color: #10B981;
+            background: #f0fdf4;
+        }
+
+        .card-option.selected {
+            border-color: #10B981;
+            background: #ecfdf5;
+        }
+
+        .card-option img {
+            width: 40px;
+            height: 40px;
+            display: block;
+            margin: 0 auto 10px;
+        }
+
+        .card-option .name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .check-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #10B981;
+            display: none;
+        }
+
+        .card-option.selected .check-icon {
+            display: block;
+        }
+
+        /* Goal List Styling (New) */
+        .goal-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .goal-card {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .goal-card:hover {
+            border-color: #10B981;
+            background: #f0fdf4;
+        }
+
+        .goal-card.selected {
+            border-color: #10B981;
+            background: #fff;
+            /* box-shadow: 0 0 0 1px #10B981; */
+        }
+
+        .goal-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            /* background: #e0f2f1; */
+            /* padding: 8px; */
+            /* border-radius: 8px; */
+        }
+
+        .goal-content {
+            flex: 1;
+        }
+
+        .goal-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #111;
+        }
+
+        .goal-desc {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .radio-btn {
+            width: 22px;
+            height: 22px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            margin-left: 15px;
+            position: relative;
+        }
+
+        .goal-card.selected .radio-btn {
+            border-color: #10B981;
+        }
+
+        .goal-card.selected .radio-btn::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 10px;
+            height: 10px;
+            background: #10B981;
+            border-radius: 50%;
+        }
+
+        /* Dynamic Target Input */
+        .target-input-container {
+            margin-top: 25px;
+            text-align: center;
+            display: none;
+            /* hidden by default */
+            animation: fadeIn 0.3s;
+        }
+
+        .target-wrapper {
+            display: inline-flex;
+            align-items: center;
+            border-bottom: 2px dashed #ddd;
+            padding-bottom: 5px;
+        }
+
+        .target-input {
+            font-size: 2rem;
+            border: none;
+            text-align: center;
+            width: 120px;
+            outline: none;
+            color: #4b5563;
+            background: transparent;
+        }
+
+        .target-suffix {
+            background: #ff5722;
+            color: white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-left: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* Radio Groups (Activity Level) */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .radio-option.selected {
+            border-color: #10B981;
+            background: #ecfdf5;
+        }
+
+        .radio-circle {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ddd;
+            border-radius: 50%;
+            margin-right: 15px;
+            position: relative;
+        }
+
+        .radio-option.selected .radio-circle {
+            border-color: #10B981;
+        }
+
+        .radio-option.selected .radio-circle::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 8px;
+            height: 8px;
+            background: #10B981;
+            border-radius: 50%;
+        }
+
+        /* Buttons */
+        .footer-btn {
+            background: #10B981;
+            /* Green */
+            color: white;
+            border: none;
+            padding: 18px;
+            width: 100%;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+        }
+
+        .footer-btn:hover {
+            background: #059669;
+        }
+
+        /* Tags */
+        .tag-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tag {
+            padding: 8px 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .tag.selected {
+            background: #10B981;
+            color: white;
+            border-color: #10B981;
+        }
+
+        /* Dynamic Target Input (New Design) */
+        .target-input-container {
+            margin-top: 30px;
+            text-align: center;
+            display: none;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .target-display-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .target-input-large {
+            font-size: 3.5rem;
+            font-weight: 300;
+            color: #9ca3af;
+            /* Light gray for placeholder/text */
+            border: none;
+            text-align: right;
+            width: 120px;
+            background: transparent;
+            outline: none;
+            padding: 0;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .target-input-large:focus {
+            color: #1f2937;
+        }
+
+        .target-unit {
+            font-size: 3.5rem;
+            font-weight: 300;
+            color: #9ca3af;
+            margin-left: 5px;
+            vertical-align: top;
+            line-height: 1;
+        }
+
+        .target-label-text {
+            font-size: 1rem;
+            color: #1f2937;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .orange-s-btn {
+            position: absolute;
+            right: -50px;
+            bottom: 0px;
+            width: 50px;
+            height: 50px;
+            background-color: #f95621;
+            /* Orange */
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(249, 86, 33, 0.3);
+            cursor: pointer;
+            border: 3px solid white;
+        }
+
+        #debug {
+            margin-top: 30px;
+            background: #333;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            overflow-x: auto;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <div class="progress-bar">
+            <button class="back-btn" onclick="prevStep()">←</button>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <span class="step-count" id="stepCount">Step 1 of 4</span>
+        </div>
+
+        <!-- Token Input for Auth -->
+        <div id="authSection"
+            style="margin-bottom:20px; background:#fff8e6; padding:10px; border-radius:8px; border:1px solid #ffeeba;">
+            <label style="font-size:0.8rem; font-weight:bold;">Auth Token:</label>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="authToken" class="input" style="padding:5px;"
+                    placeholder="Paste JWT Token here...">
+                <button onclick="fetchInitialData()" style="padding:5px 10px; cursor:pointer;">Load Data</button>
+            </div>
+        </div>
+
+        <form id="wizardForm" onsubmit="return false;">
+
+            <!-- STEP 1: Personal Info -->
+            <div class="step active" id="step1">
+                <h2>Tell Us About You</h2>
+                <div class="subtitle">Complete your profile to get personalized AI recommendations.</div>
+
+                <div class="form-group">
+                    <label class="label">What's your full name?</label>
+                    <input type="text" class="input" id="fullName" placeholder="Smith Jane">
+                </div>
+
+                <div class="form-group">
+                    <label class="label">What's your age?</label>
+                    <input type="number" class="input" id="age" placeholder="Enter age">
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Gender</label>
+                    <select id="gender" class="input">
+                        <option value="">Select Gender</option>
+                        <option value="MALE">Male</option>
+                        <option value="FEMALE">Female</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Current Weight</label>
+                    <input type="text" class="input" id="weight" placeholder="e.g. 150 lbs">
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Current Height</label>
+                    <input type="text" class="input" id="height" placeholder="e.g. 175 cm">
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Tell us a little about yourself</label>
+                    <textarea class="input" id="intro" placeholder="Write a short intro..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Website (Optional)</label>
+                    <input type="url" class="input" id="website" placeholder="https://">
+                </div>
+
+                <button class="footer-btn" onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- STEP 2: Activity Profile -->
+            <div class="step" id="step2">
+                <h2>Set Your Activity Profile</h2>
+                <div class="subtitle">Help us understand your lifestyle and exercise habits.</div>
+
+                <label class="label">How active are you?</label>
+                <div class="radio-group" id="activityLevelContainer">
+                    <div class="radio-option" onclick="selectActivityLevel('SEDENTARY', this)">
+                        <div class="radio-circle"></div>
+                        <div>
+                            <div style="font-weight:600;">Sedentary</div>
+                            <div style="font-size:0.8rem; color:#666;">Little to no exercise</div>
+                        </div>
+                    </div>
+                    <!-- Other options... -->
+                    <div class="radio-option" onclick="selectActivityLevel('SOMEWHAT_ACTIVE', this)">
+                        <div class="radio-circle"></div>
+                        <div>
+                            <div style="font-weight:600;">Somewhat Active</div>
+                        </div>
+                    </div>
+                    <div class="radio-option" onclick="selectActivityLevel('MODERATELY_ACTIVE', this)">
+                        <div class="radio-circle"></div>
+                        <div>
+                            <div style="font-weight:600;">Moderately Active</div>
+                        </div>
+                    </div>
+                    <div class="radio-option" onclick="selectActivityLevel('VERY_ACTIVE', this)">
+                        <div class="radio-circle"></div>
+                        <div>
+                            <div style="font-weight:600;">Very Active</div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="activityLevel">
+
+                <div style="margin-top:30px;">
+                    <label class="label">What types of activities do you do?</label>
+                    <div class="tag-container" id="activityTypesContainer">
+                        Loading activities...
+                    </div>
+                </div>
+
+                <button class="footer-btn" onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- STEP 3: Fitness Goal -->
+            <div class="step" id="step3">
+                <div class="subtitle">Choose your primary goal so we can create personalized nutrition and activity
+                    plans for you.</div>
+
+                <div class="goal-list" id="goalsContainer">
+                    Loading goals...
+                </div>
+
+                <div id="targetSection" class="target-input-container">
+                    <div class="target-display-wrapper">
+
+                        <div style="position: relative; display: inline-block;">
+                            <input type="text" id="targetValue" class="target-input-large" placeholder="0">
+                            <span class="target-unit">lbs</span>
+                            <div class="orange-s-btn">S</div>
+                        </div>
+
+                        <div class="target-label-text" id="targetLabelDisplay">Target Weight</div>
+                    </div>
+                </div>
+                <input type="hidden" id="selectedGoalId">
+
+                <button class="footer-btn" onclick="nextStep()">Next</button>
+            </div>
+
+            <!-- STEP 4: Dietary & Allergies (Extra Step) -->
+            <div class="step" id="step4">
+                <h2>Dietary & Allergies</h2>
+                <div class="subtitle">Let us know if you have any restrictions.</div>
+
+                <label class="label">Any Food Allergies?</label>
+                <div class="grid" id="allergiesContainer">
+                    Loading...
+                </div>
+
+                <div style="margin-top:30px;">
+                    <label class="label">Dietary Preferences</label>
+                    <div class="grid" id="dietaryContainer">
+                        Loading...
+                    </div>
+                </div>
+
+                <button class="footer-btn" onclick="submitProfile()">Complete Profile</button>
+            </div>
+
+        </form>
+
+        <div id="debug"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://api-nutripathai.nyusoft.in/api';
+        let currentStep = 1;
+        let formData = {
+            types_of_activity: [],
+            food_allergy_ids: [],
+            dietary_preference_ids: []
+        };
+
+        // --- Navigation ---
+        function nextStep() {
+            if (currentStep < 4) {
+                currentStep++;
+                updateUI();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateUI();
+            }
+        }
+
+        function updateUI() {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.getElementById(`step${currentStep}`).classList.add('active');
+
+            document.getElementById('stepCount').innerText = `Step ${currentStep} of 4`;
+            document.getElementById('progressFill').style.width = `${(currentStep / 4) * 100}%`;
+        }
+
+        // --- Selection Logic ---
+        function selectActivityLevel(val, el) {
+            formData.activity_level = val;
+            document.getElementById('activityLevel').value = val;
+            document.querySelectorAll('#activityLevelContainer .radio-option').forEach(d => d.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        function toggleActivityType(name, el) {
+            const idx = formData.types_of_activity.indexOf(name);
+            if (idx === -1) {
+                formData.types_of_activity.push(name);
+                el.classList.add('selected');
+            } else {
+                formData.types_of_activity.splice(idx, 1);
+                el.classList.remove('selected');
+            }
+        }
+
+        function selectGoal(id, hasTarget, label, el) {
+            formData.fitness_goal_id = id;
+            document.getElementById('selectedGoalId').value = id;
+
+            // UI Selection
+            document.querySelectorAll('#goalsContainer .goal-card').forEach(d => d.classList.remove('selected'));
+            el.classList.add('selected');
+
+            // Handle Target Logic
+            const targetSection = document.getElementById('targetSection');
+            if (hasTarget) {
+                targetSection.style.display = 'block';
+                document.getElementById('targetLabelDisplay').innerText = label || 'Target Value';
+                // Reset input if needed, or keep it
+            } else {
+                targetSection.style.display = 'none';
+            }
+        }
+
+        // Mirror input - Removed as we have direct input now
+        // document.addEventListener('DOMContentLoaded', () => { ... });
+
+        function toggleSelection(id, type, el) {
+            const arr = type === 'allergy' ? formData.food_allergy_ids : formData.dietary_preference_ids;
+            const idx = arr.indexOf(id);
+            if (idx === -1) {
+                arr.push(id);
+                el.classList.add('selected');
+            } else {
+                arr.splice(idx, 1);
+                el.classList.remove('selected');
+            }
+        }
+
+        // --- API Calls ---
+        async function fetchInitialData() {
+            try {
+                const token = document.getElementById('authToken').value;
+                if (!token) return alert("Please enter auth token");
+
+                const headers = { 'Authorization': `Bearer ${token}` };
+
+                // Fetch Reference Data
+                const [acts, goals, allergies, diets] = await Promise.all([
+                    fetch(`${API_BASE}/activities`).then(r => r.json()),
+                    fetch(`${API_BASE}/fitness-goals`).then(r => r.json()),
+                    fetch(`${API_BASE}/food-allergies`).then(r => r.json()),
+                    fetch(`${API_BASE}/dietary-preferences`).then(r => r.json())
+                ]);
+
+                // Render Activities
+                const actContainer = document.getElementById('activityTypesContainer');
+                actContainer.innerHTML = '';
+                (acts.data || []).forEach(a => {
+                    const div = document.createElement('div');
+                    div.className = 'tag';
+                    div.innerText = a.name;
+                    div.onclick = () => toggleActivityType(a.name, div);
+                    actContainer.appendChild(div);
+                });
+
+                // Render Goals (List View with Radio)
+                const goalsContainer = document.getElementById('goalsContainer');
+                goalsContainer.innerHTML = '';
+
+                const goalItems = goals.data && goals.data.data ? goals.data.data : (goals.data || []);
+                goalItems.forEach(g => {
+                    const div = document.createElement('div');
+                    div.className = 'goal-card';
+                    // Check by name if we should show target input
+                    const showTarget = (g.name === 'Weight Loss' || g.name === 'Muscle Gain');
+                    const label = g.name === 'Weight Loss' ? 'Target Weight' : 'Target Value';
+
+                    div.onclick = () => selectGoal(g.id, showTarget, label, div);
+
+                    div.innerHTML = `
+                        <img src="${g.icon || 'https://via.placeholder.com/40'}" class="goal-icon" onerror="this.src='https://via.placeholder.com/40'">
+                        <div class="goal-content">
+                            <div class="goal-title">${g.name}</div>
+                            <div class="goal-desc">${g.description || ''}</div>
+                        </div>
+                        <div class="radio-btn"></div>
+                    `;
+                    goalsContainer.appendChild(div);
+                });
+
+                // Render Allergies
+                const allContainer = document.getElementById('allergiesContainer');
+                allContainer.innerHTML = '';
+                const allItems = allergies.data && allergies.data.data ? allergies.data.data : (allergies.data || []);
+                allItems.forEach(a => {
+                    const div = document.createElement('div');
+                    div.className = 'card-option';
+                    div.innerHTML = `
+                    <div class="name">${a.food_name}</div>
+                    <div class="check-icon">✓</div>
+                `;
+                    div.onclick = () => toggleSelection(a.id, 'allergy', div);
+                    allContainer.appendChild(div);
+                });
+
+                // Render Dietary
+                const dietContainer = document.getElementById('dietaryContainer');
+                dietContainer.innerHTML = '';
+                const dietItems = diets.data && diets.data.data ? diets.data.data : (diets.data || []);
+                dietItems.forEach(d => {
+                    const div = document.createElement('div');
+                    div.className = 'card-option';
+                    div.innerHTML = `
+                    <div class="name">${d.food_name}</div>
+                    <div class="check-icon">✓</div>
+                `;
+                    div.onclick = () => toggleSelection(d.id, 'diet', div);
+                    dietContainer.appendChild(div);
+                });
+
+            } catch (e) {
+                console.error(e);
+                alert("Error loading data: " + e.message);
+            }
+        }
+
+        function parseJwt(token) {
+            var base64Url = token.split('.')[1];
+            var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        }
+
+        async function submitProfile() {
+            const token = document.getElementById('authToken').value;
+            if (!token) return alert('Auth token required');
+
+            let userId;
+            try {
+                const decoded = parseJwt(token);
+                console.log("Decoded Token:", decoded); // Debug log
+
+                // Try different keys common in Firebase/Standard JWTs
+                let foundId = decoded.id || decoded.userId || decoded.user_id || decoded.uid || decoded.sub;
+
+                if (foundId && String(foundId).startsWith('user-')) {
+                    foundId = foundId.split('-')[1];
+                }
+
+                userId = foundId;
+                if (!userId) throw new Error("Reference ID not found in token payload: " + JSON.stringify(decoded));
+            } catch (e) {
+                console.error(e);
+                return alert("Invalid Token: " + e.message);
+            }
+
+            const payload = {
+                ...formData,
+                full_name: document.getElementById('fullName').value,
+                age: document.getElementById('age').value || null,
+                gender: document.getElementById('gender').value || null,
+                weight: document.getElementById('weight').value,
+                height: document.getElementById('height').value,
+                intro: document.getElementById('intro').value,
+                website: document.getElementById('website').value,
+                // Add Target Value
+                target_value: document.getElementById('targetValue').value,
+                is_profile_complete: true
+            };
+
+            try {
+                const res = await fetch(`${API_BASE}/auth/profile/${userId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+
+                const debug = document.getElementById('debug');
+                debug.style.display = 'block';
+                debug.innerText = JSON.stringify(json, null, 2);
+
+                if (json.status || json.success) {
+                    alert("Profile Updated Successfully!");
+                } else {
+                    alert("Error: " + json.message);
+                }
+
+            } catch (e) {
+                alert("Submission error: " + e.message);
+            }
+        }
+    </script>
+
+
+
+
+
+    <!-- Back to Dashboard Button -->
+    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ← Dashboard
+    </a>
+
+</body>
+
+</html>

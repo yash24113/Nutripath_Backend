@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dietary Preference Manager</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f9fafb;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            flex: 1;
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #10B981;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6B7280;
+            color: white;
+        }
+
+        /* Table styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f3f4f6;
+            font-weight: 600;
+        }
+
+        td img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #E0F2FE;
+            color: #0369A1;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+
+        #preview {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            display: none;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+        }
+
+        #status {
+            margin-top: 10px;
+            color: green;
+            font-family: monospace;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Dietary Preferences</h2>
+
+        <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3>Add / Edit Preference</h3>
+            <form id="prefForm" onsubmit="handleSubmit(event)">
+                <input type="hidden" id="editId">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <select id="categoryId" class="form-input" required>
+                            <option value="">Select Category...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Food Name</label>
+                        <input type="text" id="foodName" class="form-input" required placeholder="E.g. Peanuts">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Icon</label>
+                    <input type="file" id="iconInput" accept="image/*" class="form-input">
+                    <img id="preview" src="">
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn">Create Preference</button>
+                <button type="button" class="btn btn-secondary" id="cancelBtn" onclick="resetForm()"
+                    style="display:none;">Cancel</button>
+            </form>
+            <div id="status"></div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3>All Preferences</h3>
+            <input type="text" id="search" placeholder="Search..." class="form-input" style="width:200px;"
+                onkeyup="loadPreferences()">
+        </div>
+
+        <table id="prefTable">
+            <thead>
+                <tr>
+                    <th>Icon</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="4">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        const API_BASE = 'https://api-nutripathai.nyusoft.in/api';
+        const PREF_URL = `${API_BASE}/dietary-preferences`;
+        const CAT_URL = `${API_BASE}/category-dietary`;
+
+        // Load Data
+        async function loadCategories() {
+            try {
+                const res = await fetch(CAT_URL);
+                const json = await res.json();
+                const categories = json.data && json.data.data ? json.data.data : (json.data || []);
+
+                const select = document.getElementById('categoryId');
+                select.innerHTML = '<option value="">Select Category...</option>';
+
+                categories.forEach(cat => {
+                    const opt = document.createElement('option');
+                    opt.value = cat.id;
+                    opt.textContent = cat.name;
+                    select.appendChild(opt);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        async function loadPreferences() {
+            const search = document.getElementById('search').value;
+            try {
+                const res = await fetch(`${PREF_URL}?search=${search}`);
+                const json = await res.json();
+                const items = json.data.data ? json.data.data : (json.data || []);
+
+                const tbody = document.querySelector('#prefTable tbody');
+                tbody.innerHTML = '';
+
+                if (items.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;">No preferences found</td></tr>';
+                    return;
+                }
+
+                items.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                    <td><img src="${item.food_icon || 'https://via.placeholder.com/40'}" onerror="this.src='https://via.placeholder.com/40'"></td>
+                    <td>${item.food_name}</td>
+                    <td><span class="badge">${item.category ? item.category.name : 'Unknown'}</span></td>
+                    <td class="actions">
+                        <button class="btn btn-primary btn-sm" onclick='editItem(${JSON.stringify(item)})'>Edit</button>
+                        <button class="btn btn-secondary btn-sm" style="background:#EF4444;" onclick="deleteItem('${item.id}')">Delete</button>
+                    </td>
+                `;
+                    tbody.appendChild(row);
+                });
+
+            } catch (e) {
+                console.error(e);
+                document.querySelector('#prefTable tbody').innerHTML = '<tr><td colspan="4">Error loading data</td></tr>';
+            }
+        }
+
+        // CRUD Operations
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const id = document.getElementById('editId').value;
+            const categoryId = document.getElementById('categoryId').value;
+            const foodName = document.getElementById('foodName').value;
+            const file = document.getElementById('iconInput').files[0];
+            const status = document.getElementById('status');
+
+            const formData = new FormData();
+            formData.append('category_id', categoryId);
+            formData.append('food_name', foodName);
+            if (file) formData.append('food_icon', file);
+
+            status.innerText = 'Processing...';
+
+            try {
+                let res;
+                if (id) {
+                    res = await fetch(`${PREF_URL}/${id}`, {
+                        method: 'PUT',
+                        body: formData
+                    });
+                } else {
+                    res = await fetch(PREF_URL, {
+                        method: 'POST',
+                        body: formData
+                    });
+                }
+
+                const json = await res.json();
+                status.innerText = json.message || 'Success';
+
+                if (json.status || json.success) { // API seems to use 'status' in some, 'success' in others. Handle both.
+                    resetForm();
+                    loadPreferences();
+                } else {
+                    status.innerText = 'Error: ' + (json.message || 'Unknown error');
+                    status.style.color = 'red';
+                }
+
+            } catch (e) {
+                status.innerText = 'Error: ' + e.message;
+                status.style.color = 'red';
+            }
+        }
+
+        async function deleteItem(id) {
+            if (!confirm('Delete this item?')) return;
+            try {
+                await fetch(`${PREF_URL}/${id}`, { method: 'DELETE' });
+                loadPreferences();
+            } catch (e) { alert(e.message); }
+        }
+
+        function editItem(item) {
+            document.getElementById('editId').value = item.id;
+            document.getElementById('categoryId').value = item.category_id;
+            document.getElementById('foodName').value = item.food_name;
+
+            const preview = document.getElementById('preview');
+            if (item.food_icon) {
+                preview.src = item.food_icon;
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+
+            document.getElementById('submitBtn').innerText = 'Update Preference';
+            document.getElementById('cancelBtn').style.display = 'inline-block';
+
+            // Scroll to form
+            document.getElementById('prefForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('prefForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('preview').style.display = 'none';
+            document.getElementById('submitBtn').innerText = 'Create Preference';
+            document.getElementById('cancelBtn').style.display = 'none';
+            document.getElementById('status').innerText = '';
+        }
+
+        // Init
+        loadCategories();
+        loadPreferences();
+    </script>
+
+
+
+
+
+    <!-- Back to Dashboard Button -->
+    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ← Dashboard
+    </a>
+
+</body>
+
+</html>

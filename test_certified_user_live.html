@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Become a Certified User</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #047857;
+            /* Dark Green from mockup */
+            --bg: #F9FAFB;
+            --card-bg: #FFFFFF;
+            --text: #1F2937;
+            --border: #E5E7EB;
+            --input-bg: #F3F4F6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            /* Mobile-app like width */
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
+        }
+
+        /* HEADER */
+        .header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .back-btn {
+            font-size: 1.2rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+
+        .header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+            flex: 1;
+            text-align: center;
+            margin-right: 24px;
+        }
+
+        /* CONTENT AREA */
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .step-indicator {
+            font-size: 0.85rem;
+            color: #6B7280;
+            margin-bottom: 5px;
+        }
+
+        .step-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+        }
+
+        /* FORM ELEMENTS */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .input-box {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid transparent;
+            background-color: var(--input-bg);
+            border-radius: 12px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            transition: all 0.2s;
+        }
+
+        .input-box:focus {
+            background: #fff;
+            border-color: var(--primary);
+            outline: none;
+        }
+
+        .add-more {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .add-more:hover {
+            text-decoration: underline;
+        }
+
+        /* ROW LAYOUT */
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .col {
+            flex: 1;
+        }
+
+        /* UPLOAD BOX */
+        .upload-box {
+            border: 2px dashed #A7F3D0;
+            /* Light green dashed */
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            background: #F0FDF4;
+        }
+
+        .upload-icon {
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .upload-text {
+            font-size: 0.9rem;
+            color: #4B5563;
+        }
+
+        /* SOCIAL OPTIONS */
+        .social-option {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .social-option.selected {
+            border-color: var(--primary);
+            background-color: #ECFDF5;
+        }
+
+        .radio {
+            margin-left: auto;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #D1D5DB;
+            border-radius: 50%;
+        }
+
+        .social-option.selected .radio {
+            border: 5px solid var(--primary);
+        }
+
+        /* FOOTER BUTTONS */
+        .footer {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 15px;
+            background: #fff;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 25px;
+            /* Pill shape */
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background-color: #E5E7EB;
+            color: #374151;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .dynamic-item {
+            position: relative;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px dotted #e5e5e5;
+        }
+
+        .remove-btn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            color: #EF4444;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        /* LOG BOX */
+        .log-overlay {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #0f0;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 0.7rem;
+            overflow: auto;
+            border-radius: 10px;
+            z-index: 9999;
+            display: none;
+        }
+
+        /* MODAL */
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-badge.approved {
+            background: #D1FAE5;
+            color: #047857;
+        }
+
+        .status-badge.rejected {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .success-icon-large {
+            width: 60px;
+            height: 60px;
+            background: #D1FAE5;
+            color: #047857;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin: 0 auto 20px auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- AUTH OVERLAY (To set token) -->
+    <div id="authOverlay"
+        style="position:fixed; top:0; left:0; right:0; bottom:0; background:#fff; z-index:2000; padding:40px; text-align:center;">
+        <h2>Authentication Required</h2>
+        <p>Please enter your Bearer Token to proceed.</p>
+        <input type="text" id="initToken" class="input-box" placeholder="Paste Token Here" style="margin-bottom:20px;">
+        <button class="btn btn-primary" onclick="initApp()">Start Certification</button>
+    </div>
+
+    <!-- LOGS -->
+    <div id="logBox" class="log-overlay"></div>
+    <button onclick="toggleLogs()"
+        style="position:fixed; bottom:10px; right:10px; z-index:10000; font-size:10px;">Logs</button>
+
+    <!-- SUCCESS MODAL -->
+    <div id="successModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="success-icon-large">✓</div>
+            <h3 style="margin:0 0 10px 0; font-size:1.5rem;">Verified Successfully</h3>
+            <p style="color:#6B7280; margin-bottom:20px;">Your account has been connected and Verified. You have
+                <strong>50,000+ followers</strong>.
+            </p>
+            <button class="btn btn-primary" onclick="closeModal()" style="width:100%">Continue</button>
+        </div>
+    </div>
+
+    <div class="container" id="mainApp" style="opacity:0.3; pointer-events:none;">
+
+        <div class="header">
+            <button class="back-btn" onclick="prevStep()">←</button>
+            <h1>Become a Certified User</h1>
+        </div>
+
+        <form id="certForm" class="content">
+
+            <!-- STEP 1: Professional Info -->
+            <div id="step1">
+                <div class="step-indicator">Step 1 of 3</div>
+                <div class="step-title">Professional Information</div>
+
+                <div class="form-group">
+                    <label class="label">Services offered</label>
+                    <div id="services-list">
+                        <!-- Dynamic inputs -->
+                    </div>
+                    <div class="add-more" onclick="addService()">+ Add more</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Specialization</label>
+                    <div id="specializations-list"></div>
+                    <div class="add-more" onclick="addSpecialization()">+ Add more</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Experience</label>
+                    <div id="experience-list"></div>
+                    <div class="add-more" onclick="addExperience()">+ Add more</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Education</label>
+                    <div id="education-list"></div>
+                    <div class="add-more" onclick="addEducation()">+ Add more</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Supporting Languages</label>
+                    <select id="languages" class="input-box" multiple style="height: 100px;">
+                        <option value="ENGLISH">English</option>
+                        <option value="SPANISH">Spanish</option>
+                        <option value="HINDI">Hindi</option>
+                        <option value="FRENCH">French</option>
+                    </select>
+                    <small style="color:#666; font-size:0.75rem;">Hold Ctrl/Cmd to select multiple</small>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Certifications</label>
+                    <div id="certifications-list"></div>
+                    <div class="add-more" onclick="addCertification()">+ Add more</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Availability</label>
+                    <div id="availability-list"></div>
+                    <div class="add-more" onclick="addAvailability()">+ Add more</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Professional Documents</label>
+                    <div class="upload-box" onclick="document.getElementById('docsInput').click()">
+                        <div class="upload-icon">↑</div>
+                        <div class="upload-text">Upload document</div>
+                    </div>
+                    <input type="file" id="docsInput" multiple class="hidden" onchange="handleFileSelect(this)">
+                    <div id="fileCount" style="margin-top:5px; font-size:0.8rem; color:#666;"></div>
+                    <div id="file-previews" style="margin-top:10px; display:flex; flex-wrap:wrap; gap:5px;"></div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Social Verification -->
+            <div id="step2" class="hidden">
+                <div class="step-indicator">Step 2 of 3</div>
+                <div class="step-title">Social Verification</div>
+
+                <div
+                    style="background:#FFF7ED; padding:15px; border-radius:10px; margin-bottom:20px; font-size:0.9rem; color:#9A3412; display:flex; gap:10px;">
+                    <span>ⓘ</span>
+                    <span>Connect a social account with at least 50,000 followers to proceed.</span>
+                </div>
+
+                <div class="social-list">
+                    <div class="social-option" onclick="selectSocial('INSTAGRAM', this)">
+                        <span>📷 Instagram</span>
+                        <div class="radio" id="radio-INSTAGRAM"></div>
+                    </div>
+                    <div class="social-option" onclick="selectSocial('TIKTOK', this)">
+                        <span>🎵 TikTok</span>
+                        <div class="radio" id="radio-TIKTOK"></div>
+                    </div>
+                    <div class="social-option" onclick="selectSocial('YOUTUBE', this)">
+                        <span>▶ YouTube</span>
+                        <div class="radio" id="radio-YOUTUBE"></div>
+                    </div>
+                    <div class="social-option" onclick="selectSocial('FACEBOOK', this)">
+                        <span>f Facebook</span>
+                        <div class="radio" id="radio-FACEBOOK"></div>
+                    </div>
+                    <div class="social-option" onclick="selectSocial('MANUAL', this)">
+                        <span>📝 Manual</span>
+                        <div class="radio" id="radio-MANUAL"></div>
+                    </div>
+                    <!-- Hidden input for manual username -->
+                    <div id="social-input-area" class="hidden" style="margin-top:10px;">
+                        <input type="text" id="socialUsername" class="input-box" placeholder="Enter Username / Handle">
+                    </div>
+                </div>
+
+                <button type="button" class="btn btn-primary" style="width:100%; margin-top:20px;"
+                    onclick="connectSocial()">Connect
+                    Account</button>
+            </div>
+
+            <!-- STEP 3: Profile Actions -->
+            <div id="step3" class="hidden">
+                <div class="step-indicator">Step 3 of 3</div>
+                <div class="step-title">Profile Actions</div>
+
+                <div class="form-group">
+                    <label class="label">Primary Action Button</label>
+
+                    <div class="social-option" onclick="selectAction('WEBSITE', this)">
+                        <span>📖 Cookbook / Website</span>
+                        <div class="radio" id="radio-WEBSITE"></div>
+                    </div>
+
+                    <div class="social-option" onclick="selectAction('PHONE', this)">
+                        <span>📞 Contact</span>
+                        <div class="radio" id="radio-PHONE"></div>
+                    </div>
+
+                    <input type="text" id="actionUrl" class="input-box hidden" placeholder="Enter URL"
+                        style="margin-top:10px;">
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Book Consultation</label>
+                    <input type="text" id="consultUrl" class="input-box" placeholder="Enter consultation URL">
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Consultation Rate (per hour)</label>
+                    <input type="number" id="consultRate" class="input-box" placeholder="E.g. 50">
+                </div>
+
+                <div class="form-group">
+                    <label class="label">Store</label>
+                    <div id="store-list">
+                        <!-- dynamic store urls -->
+                    </div>
+                    <div class="add-more" onclick="addStore()">+ Add more URL</div>
+                </div>
+            </div>
+
+        </form>
+
+        <div class="footer">
+            <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+            <button class="btn btn-primary" onclick="nextStep()" id="nextBtn">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        let selectedSocial = null;
+        let selectedActionType = null;
+        let token = null;
+
+        function log(msg) {
+            const box = document.getElementById('logBox');
+            box.style.display = 'block';
+            box.innerText += `> ${typeof msg === 'object' ? JSON.stringify(msg) : msg}\n`;
+            console.log(msg);
+        }
+        function toggleLogs() {
+            const box = document.getElementById('logBox');
+            box.style.display = box.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function initApp() {
+            const t = document.getElementById('initToken').value.trim();
+            if (!t) return alert("Token Required");
+            token = t;
+            document.getElementById('authOverlay').style.display = 'none';
+            document.getElementById('mainApp').style.opacity = '1';
+            document.getElementById('mainApp').style.pointerEvents = 'all';
+
+            // Init fields
+            addService();
+            addSpecialization();
+            addExperience();
+            addEducation();
+            addCertification();
+            addAvailability();
+            addStore();
+        }
+
+        function updateFileCount() {
+            const n = document.getElementById('docsInput').files.length;
+            document.getElementById('fileCount').innerText = `${n} files selected`;
+        }
+
+        // --- HELPERS ---
+        function createSelect(options, placeholder) {
+            const sel = document.createElement('select');
+            sel.className = 'input-box';
+            if (placeholder) {
+                const p = document.createElement('option');
+                p.text = placeholder; p.value = ""; p.disabled = true; p.selected = true;
+                sel.appendChild(p);
+            }
+            options.forEach(opt => {
+                const o = document.createElement('option');
+                o.value = opt.value || opt;
+                o.text = opt.label || opt;
+                sel.appendChild(o);
+            });
+            return sel;
+        }
+
+        // --- DYNAMIC FIELDS ---
+        function createInput(placeholder, className = 'input-box') {
+            const i = document.createElement('input');
+            i.type = 'text';
+            i.className = className;
+            i.placeholder = placeholder;
+            return i;
+        }
+        function createRemoveBtn(parent) {
+            const btn = document.createElement('span');
+            btn.className = 'remove-btn';
+            btn.innerText = 'Remove';
+            btn.onclick = () => parent.remove();
+            return btn;
+        }
+
+        function addService() {
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.appendChild(createRemoveBtn(div));
+            div.appendChild(createInput('Service name'));
+            document.getElementById('services-list').appendChild(div);
+        }
+
+        function addSpecialization() {
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.appendChild(createRemoveBtn(div));
+            div.appendChild(createInput('Specialization Name'));
+            const desc = createInput('Experience / Description', 'input-box');
+            desc.style.marginTop = '10px';
+            div.appendChild(desc);
+            document.getElementById('specializations-list').appendChild(div);
+        }
+
+        function addExperience() {
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.appendChild(createRemoveBtn(div));
+            // Title & Company
+            div.appendChild(createInput('Job Title'));
+            const comp = createInput('Company');
+            comp.style.marginTop = '8px';
+            div.appendChild(comp);
+
+            // Dates
+            const row = document.createElement('div');
+            row.className = 'row';
+            row.style.marginTop = '8px';
+            const start = document.createElement('input'); start.type = 'date'; start.className = 'input-box';
+            const end = document.createElement('input'); end.type = 'date'; end.className = 'input-box';
+            row.appendChild(start); row.appendChild(end);
+            div.appendChild(row);
+
+            document.getElementById('experience-list').appendChild(div);
+        }
+
+        function addEducation() {
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.appendChild(createRemoveBtn(div));
+            div.appendChild(createInput('Education / Degree Name'));
+            document.getElementById('education-list').appendChild(div);
+        }
+
+        function addCertification() {
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.appendChild(createRemoveBtn(div));
+            div.appendChild(createInput('Certification Name'));
+
+            const row = document.createElement('div');
+            row.className = 'row';
+            row.style.marginTop = '8px';
+
+            const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'];
+            const mSelect = createSelect(months, "Select Month");
+
+            const currentYear = new Date().getFullYear();
+            const years = [];
+            for (let y = 2000; y <= currentYear; y++) years.push(y.toString());
+            const ySelect = createSelect(years.reverse(), "Select Year");
+
+            row.appendChild(mSelect);
+            row.appendChild(ySelect);
+            div.appendChild(row);
+
+            document.getElementById('certifications-list').appendChild(div);
+        }
+
+        function addAvailability() {
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.style.overflow = 'visible'; // Allow dropdown to flow out
+            div.appendChild(createRemoveBtn(div));
+
+            const row = document.createElement('div');
+            row.className = 'row';
+
+            const day = document.createElement('select'); day.className = 'input-box';
+            ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'].forEach(d => {
+                const o = document.createElement('option'); o.value = d; o.innerText = d; day.appendChild(o);
+            });
+
+            // Custom multi-select checkbox UI
+            const timeWrapper = document.createElement('div');
+            timeWrapper.className = 'input-box';
+            timeWrapper.style.position = 'relative';
+            timeWrapper.style.cursor = 'pointer';
+            timeWrapper.innerText = 'Select Times...';
+            timeWrapper.onclick = (e) => {
+                if (e.target !== timeWrapper) return;
+                const menu = timeWrapper.querySelector('.time-menu');
+                menu.classList.toggle('hidden');
+            };
+
+            const timeMenu = document.createElement('div');
+            timeMenu.className = 'time-menu hidden';
+            timeMenu.style.position = 'absolute';
+            timeMenu.style.top = '100%';
+            timeMenu.style.left = '0';
+            timeMenu.style.right = '0';
+            timeMenu.style.background = 'white';
+            timeMenu.style.border = '1px solid #ccc';
+            timeMenu.style.zIndex = '100';
+            timeMenu.style.maxHeight = '150px';
+            timeMenu.style.overflowY = 'auto';
+            timeMenu.style.padding = '5px';
+
+            const times = ['Morning', 'Afternoon', 'Evening', 'Night', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM'];
+            times.forEach(t => {
+                const label = document.createElement('label');
+                label.style.display = 'block';
+                label.style.padding = '4px';
+                label.style.cursor = 'pointer';
+
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.value = t;
+                cb.style.marginRight = '8px';
+                cb.onchange = () => {
+                    const checked = Array.from(timeMenu.querySelectorAll('input:checked')).map(i => i.value);
+                    timeWrapper.firstChild.textContent = checked.length ? checked.join(', ') : 'Select Times...';
+                };
+
+                label.appendChild(cb);
+                label.appendChild(document.createTextNode(t));
+                timeMenu.appendChild(label);
+            });
+
+            timeWrapper.appendChild(timeMenu);
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!timeWrapper.contains(e.target)) timeMenu.classList.add('hidden');
+            });
+
+            row.appendChild(day);
+            row.appendChild(timeWrapper);
+            div.appendChild(row);
+            document.getElementById('availability-list').appendChild(div);
+        }
+
+        function addStore() {
+            const div = document.createElement('div');
+            div.className = 'dynamic-item';
+            div.appendChild(createRemoveBtn(div));
+            div.appendChild(createInput('Store URL'));
+            document.getElementById('store-list').appendChild(div);
+        }
+
+        function handleFileSelect(input) {
+            const previewDiv = document.getElementById('file-previews');
+            previewDiv.innerHTML = '';
+            const files = input.files;
+            document.getElementById('fileCount').innerText = `${files.length} files selected`;
+
+            if (files.length > 0) {
+                Array.from(files).forEach(file => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.style.width = '50px';
+                            img.style.height = '50px';
+                            img.style.objectFit = 'cover';
+                            img.style.borderRadius = '6px';
+                            img.style.marginRight = '5px';
+                            img.style.border = '1px solid #ddd';
+                            previewDiv.appendChild(img);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+            }
+        }
+
+
+        // --- STEP LOGIC ---
+
+        function updateStepUI() {
+            ['step1', 'step2', 'step3'].forEach((id, idx) => {
+                const el = document.getElementById(id);
+                if (idx + 1 === currentStep) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+
+            const btn = document.getElementById('nextBtn');
+            btn.innerText = currentStep === 3 ? "Submit for Approval" : "Continue";
+            if (currentStep === 3) btn.classList.replace('btn-primary', 'btn-primary'); // keep style
+        }
+
+        function nextStep() {
+            if (currentStep < 3) {
+                currentStep++;
+                updateStepUI();
+            } else {
+                submitForm();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStepUI();
+            }
+        }
+
+        function selectSocial(type, element) {
+            selectedSocial = type;
+            document.querySelectorAll('#step2 .social-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+
+            const area = document.getElementById('social-input-area');
+            if (type === 'MANUAL') {
+                area.classList.add('hidden');
+            } else {
+                area.classList.remove('hidden');
+            }
+        }
+
+        function connectSocial() {
+            if (!selectedSocial) {
+                alert("Please select a social platform first.");
+                return;
+            }
+
+            if (selectedSocial === 'MANUAL') {
+                // Manual flow: Just mark as done
+                const radio = document.getElementById(`radio-MANUAL`);
+                if (radio) {
+                    radio.style.background = 'var(--primary)';
+                    radio.innerHTML = '✓';
+                    radio.style.color = 'white';
+                    radio.style.display = 'flex'; radio.style.alignItems = 'center'; radio.style.justifyContent = 'center'; radio.style.fontSize = '12px';
+                }
+                return;
+            }
+
+            const username = document.getElementById('socialUsername').value;
+            if (!username) return alert("Enter username");
+
+            // Mock Profile Display
+            document.getElementById('profile-pic-mock').src = "https://ui-avatars.com/api/?name=" + username;
+            document.getElementById('profile-username-mock').innerText = "@" + username;
+
+            // Logic: if username ends with 'fail' -> Rejected, else Approved (>50k)
+            const isApproved = !username.includes('fail');
+
+            const statusEl = document.getElementById('mock-status');
+            const followersEl = document.getElementById('mock-followers');
+
+            if (isApproved) {
+                statusEl.innerText = "APPROVED";
+                statusEl.className = "status-badge approved";
+                followersEl.innerText = "54,230 Followers";
+            } else {
+                statusEl.innerText = "REJECTED";
+                statusEl.className = "status-badge rejected";
+                followersEl.innerText = "1,200 Followers";
+            }
+
+            // Show Custom Profile Modal
+            document.getElementById('profileModal').classList.add('active');
+
+            // Update UI for connection on close if APPROVED
+            if (isApproved) {
+                const radio = document.getElementById(`radio-${selectedSocial}`);
+                if (radio) {
+                    radio.style.background = 'var(--primary)';
+                    radio.innerHTML = '✓';
+                    radio.style.color = 'white';
+                    radio.style.display = 'flex'; radio.style.alignItems = 'center'; radio.style.justifyContent = 'center'; radio.style.fontSize = '12px';
+                }
+            }
+        }
+
+        function closeProfileModal() {
+            document.getElementById('profileModal').classList.remove('active');
+        }
+
+        function selectAction(type, element) {
+            selectedActionType = type;
+            document.querySelectorAll('#step3 .social-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            document.getElementById('actionUrl').classList.remove('hidden');
+        }
+
+        // --- SUBMISSION ---
+
+        async function submitForm() {
+            log("Preparing submission...");
+
+            const formData = new FormData();
+
+            // 1. Services
+            const services = [];
+            document.querySelectorAll('#services-list input').forEach(i => { if (i.value) services.push(i.value) });
+            formData.append('services_offered', JSON.stringify(services));
+
+            // 2. Specializations
+            const specs = [];
+            const specDivs = document.getElementById('specializations-list').children;
+            for (let div of specDivs) {
+                const inps = div.querySelectorAll('input');
+                if (inps[0].value) specs.push({ name: inps[0].value, description: inps[1].value });
+            }
+            formData.append('specializations', JSON.stringify(specs));
+
+            // 3. Experience
+            const exps = [];
+            const expDivs = document.getElementById('experience-list').children;
+            for (let div of expDivs) {
+                const inps = div.querySelectorAll('input');
+                if (inps[0].value) {
+                    exps.push({
+                        title: inps[0].value,
+                        company: inps[1].value || "",
+                        start_date: inps[2].value ? new Date(inps[2].value).toISOString() : new Date().toISOString(),
+                        end_date: inps[3].value ? new Date(inps[3].value).toISOString() : null
+                    });
+                }
+            }
+            formData.append('experience', JSON.stringify(exps));
+
+            // 4. Education
+            const edus = [];
+            document.querySelectorAll('#education-list input').forEach(i => { if (i.value) edus.push(i.value) });
+            formData.append('education', JSON.stringify(edus));
+
+            // 5. Certifications
+            const certs = [];
+            const certDivs = document.getElementById('certifications-list').children;
+            for (let div of certDivs) {
+                const name = div.querySelector('input').value; // Certification Name
+                const selects = div.querySelectorAll('select');
+                const month = selects[0].value;
+                const year = parseInt(selects[1].value);
+                if (name) certs.push({ certification_name: name, month: month, year: year });
+            }
+            formData.append('certifications', JSON.stringify(certs));
+
+            // 6. Availability
+            const avail = [];
+            const availDivs = document.getElementById('availability-list').children;
+            for (let div of availDivs) {
+                const day = div.querySelector('select').value;
+                // Get Times from custom wrapper
+                const timeText = div.querySelector('.input-box').firstChild.textContent;
+                // Simple parse back or we could store it better.
+                // For now, let's just send the text string "Morning, 9 AM" as availability_time
+                if (timeText && timeText !== 'Select Times...') {
+                    avail.push({ day: day, availability_time: timeText });
+                }
+            }
+            formData.append('availability', JSON.stringify(avail));
+
+            // 7. Languages
+            const langs = Array.from(document.getElementById('languages').selectedOptions).map(o => o.value);
+            formData.append('supporting_languages', JSON.stringify(langs));
+
+            // 8. Files
+            const fileInp = document.getElementById('docsInput');
+            for (let f of fileInp.files) {
+                formData.append('documents', f);
+            }
+
+            // 9. Social
+            const social = [];
+            if (selectedSocial) {
+                social.push({
+                    social_type: selectedSocial,
+                    username: document.getElementById('socialUsername').value || "user123",
+                    follower_count: 50000 // Mock value
+                });
+            }
+            formData.append('social_verification', JSON.stringify(social));
+
+            // 10. Profile Actions
+            const actions = [];
+            if (selectedActionType) {
+                actions.push({
+                    type: selectedActionType,
+                    url: document.getElementById('actionUrl').value || "http://example.com",
+                    is_active: true
+                });
+            }
+            formData.append('profile_actions', JSON.stringify(actions));
+
+            // Consult / Store
+            if (document.getElementById('consultUrl').value)
+                formData.append('book_consultation_url', document.getElementById('consultUrl').value);
+
+            if (document.getElementById('consultRate').value)
+                formData.append('consultation_rate', document.getElementById('consultRate').value);
+
+            const stores = [];
+            document.querySelectorAll('#store-list input').forEach(i => { if (i.value) stores.push(i.value) });
+            formData.append('stored_urls', JSON.stringify(stores));
+
+
+            // SUBMIT
+            try {
+                log("Sending Request...");
+                const res = await fetch('https://api-nutripathai.nyusoft.in/api/certified-users/apply', {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+                const data = await res.json();
+                log(data);
+                if (res.ok) alert("Application Submitted Successfully!");
+                else alert("Error: " + data.message);
+            } catch (e) {
+                log(e);
+                alert("Network Error: " + e.message);
+            }
+        }
+
+    </script>
+
+
+
+
+    <!-- Back to Dashboard Button -->
+    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ← Dashboard
+    </a>
+
+</body>
+
+</html>

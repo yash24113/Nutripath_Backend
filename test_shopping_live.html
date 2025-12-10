@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping List Test (Live)</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f9fafb;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            min-height: 80vh;
+            position: relative;
+        }
+
+        .header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .close-btn {
+            background: #f3f4f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: #f3f4f6;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus {
+            background: white;
+            border-color: #10B981;
+            outline: none;
+        }
+
+        /* Composite Input for Size */
+        .composite-input {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 12px;
+            align-items: center;
+            padding-right: 15px;
+            border: 1px solid transparent;
+        }
+
+        .composite-input:focus-within {
+            background: white;
+            border-color: #10B981;
+        }
+
+        .composite-input input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        .composite-input select {
+            width: auto;
+            background: transparent;
+            border: none;
+            font-weight: 500;
+            text-align: right;
+            outline: none;
+            color: #374151;
+            cursor: pointer;
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .image-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #E6FFFA;
+            color: #10B981;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            object-fit: cover;
+        }
+
+        .edit-img-text {
+            text-align: center;
+            color: #10B981;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: #10B981;
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+        }
+
+        /* List Styles */
+        .list-section {
+            margin-top: 30px;
+        }
+
+        .list-header {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .list-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .item-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            margin-right: 15px;
+            object-fit: cover;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: 600;
+            color: #111;
+            font-size: 0.95rem;
+        }
+
+        .item-meta {
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: 2px;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .action-icon {
+            cursor: pointer;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .action-icon:hover {
+            color: #10B981;
+        }
+
+        .action-icon.flag {
+            color: #DC2626;
+        }
+
+        /* Red flag */
+        .action-icon.flag.active {
+            color: #10B981;
+        }
+
+        /* Green flag if active? Or maybe flag means remove/hide */
+
+        .auth-box {
+            background: #FEF3C7;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .auth-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #FCD34D;
+            border-radius: 8px;
+            font-family: monospace;
+            box-sizing: border-box;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+            background: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            font-weight: 600;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .tab.active {
+            color: #10B981;
+            border-bottom: 2px solid #10B981;
+        }
+
+        #addItemView {
+            display: block;
+        }
+
+        #listView {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="auth-box">
+            <div style="font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; color: #92400E;">Auth Token</div>
+            <input type="text" id="authToken" class="auth-input" placeholder="Paste Bearer Token...">
+            <div style="text-align:right; font-size:0.7rem; margin-top:5px; color:#92400E;" id="authStatus">Not checked
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('add')">Add Item</div>
+            <div class="tab" onclick="switchTab('list')">Shopping List</div>
+        </div>
+
+        <!-- ADD ITEM VIEW -->
+        <div id="addItemView" class="content">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img src="https://via.placeholder.com/80?text=%F0%9F%8D%B4" class="image-circle" id="imgPreview"
+                    onclick="document.getElementById('fileInput').click()">
+                <input type="file" id="fileInput" style="display: none;" accept="image/*" onchange="previewImage(this)">
+                <div class="edit-img-text" onclick="document.getElementById('fileInput').click()">✎ Edit Image</div>
+            </div>
+
+            <form id="addForm" onsubmit="handleAddItem(event)">
+                <input type="hidden" id="editItemId">
+
+                <div class="form-group">
+                    <label class="form-label">Item Name</label>
+                    <input type="text" class="form-input" id="itemName" placeholder="Enter item name" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Size</label>
+                    <div class="composite-input">
+                        <input type="text" id="sizeValue" placeholder="E.g 1 pack">
+                        <div style="border-left: 1px solid #ddd; height: 20px; margin: 0 10px;"></div>
+                        <select id="sizeUnit">
+                            <option value="Pack">Pack</option>
+                            <option value="Kg">Kg</option>
+                            <option value="Lb">Lb</option>
+                            <option value="Bot">Bot</option>
+                            <option value="Box">Box</option>
+                            <option value="Large">Large</option>
+                            <option value="Medium">Medium</option>
+                            <option value="Small">Small</option>
+                            <option value="Pieces">Pieces</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Quantity</label>
+                    <input type="text" class="form-input" id="itemQty" placeholder="E.g 750 gr">
+                </div>
+
+                <button type="submit" class="btn-primary" id="submitBtn">Add to Shopping</button>
+                <button type="button" class="btn-primary" style="background:#6B7280; margin-top:10px; display:none;"
+                    id="cancelEditBtn" onclick="resetForm()">Cancel Edit</button>
+            </form>
+
+            <div id="response"
+                style="margin-top:20px; font-family:monospace; font-size:0.8rem; color:green; display:none;"></div>
+        </div>
+
+        <!-- LIST VIEW -->
+        <div id="listView" class="content" style="padding-top:0;">
+            <div class="list-section">
+                <div class="list-header">
+                    My Items <span onclick="fetchItems()"
+                        style="font-size:0.8rem; color:#10B981; font-weight:400; cursor:pointer;">(Refresh)</span>
+                </div>
+                <div id="shoppingListContainer">
+                    <div style="text-align:center; color:#999; padding:20px;">Loading...</div>
+                </div>
+            </div>
+
+            <div class="list-section">
+                <div class="list-header" style="color:#666;">
+                    Already Have <span style="font-size:0.8rem; font-weight:400;">(Flagged)</span>
+                </div>
+                <div id="haveListContainer">
+                    <!-- Items marked as purchased/have go here -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const BASE_URL = 'https://api-nutripathai.nyusoft.in/api/shopping-list';
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            if (tab === 'add') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('addItemView').style.display = 'block';
+                document.getElementById('listView').style.display = 'none';
+            } else {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('addItemView').style.display = 'none';
+                document.getElementById('listView').style.display = 'block';
+                fetchItems();
+            }
+        }
+
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('imgPreview').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('addForm').reset();
+            document.getElementById('editItemId').value = '';
+            document.getElementById('imgPreview').src = 'https://via.placeholder.com/80?text=%F0%9F%8D%B4';
+            document.getElementById('submitBtn').innerText = "Add to Shopping";
+            document.getElementById('cancelEditBtn').style.display = 'none';
+            document.getElementById('sizeUnit').value = 'Pack';
+        }
+
+        async function handleAddItem(e) {
+            e.preventDefault();
+            const token = document.getElementById('authToken').value.trim();
+            if (!token) return alert('Please enter auth token');
+
+            const id = document.getElementById('editItemId').value;
+            const name = document.getElementById('itemName').value;
+            // Combine size
+            const sizeVal = document.getElementById('sizeValue').value.trim();
+            const sizeUnit = document.getElementById('sizeUnit').value;
+            const size = sizeVal ? `${sizeVal} ${sizeUnit}` : '';
+
+            const qty = document.getElementById('itemQty').value;
+            const file = document.getElementById('fileInput').files[0];
+
+            const formData = new FormData();
+            formData.append('name', name);
+            formData.append('size', size);
+            formData.append('quantity', qty);
+            if (file) formData.append('image', file);
+
+            const log = document.getElementById('response');
+            log.style.display = 'block';
+            log.innerText = 'Sending...';
+
+            try {
+                let url = `${BASE_URL}/add`;
+                let method = 'POST';
+
+                if (id) {
+                    url = `${BASE_URL}/edit/${id}`;
+                    method = 'PUT';
+                }
+
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData
+                });
+
+                const data = await res.json();
+                log.innerText = JSON.stringify(data, null, 2);
+
+                if (data.status || data.success) { // Handle varied response format
+                    if (!id) resetForm();
+                    if (document.getElementById('listView').style.display !== 'none') fetchItems();
+                }
+
+            } catch (e) {
+                log.innerText = 'Error: ' + e.message;
+            }
+        }
+
+        async function fetchItems() {
+            const token = document.getElementById('authToken').value.trim();
+            const list = document.getElementById('shoppingListContainer');
+            const haveList = document.getElementById('haveListContainer');
+
+            if (!token) {
+                list.innerHTML = '<div>Please enter token</div>';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${BASE_URL}/list`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const result = await res.json();
+
+                if ((result.status || result.success) && result.data) {
+                    const items = Array.isArray(result.data) ? result.data : (result.data.data || []);
+                    renderItems(items);
+                } else {
+                    list.innerHTML = `<div>${result.message || 'Error'}</div>`;
+                }
+            } catch (e) {
+                list.innerHTML = `<div>Error loading items: ${e.message}</div>`;
+            }
+        }
+
+        function renderItems(items) {
+            const list = document.getElementById('shoppingListContainer');
+            const haveList = document.getElementById('haveListContainer');
+            list.innerHTML = '';
+            haveList.innerHTML = '';
+
+            if (items.length === 0) {
+                list.innerHTML = '<div style="text-align:center; padding:20px;">List is empty</div>';
+                return;
+            }
+
+            items.forEach(item => {
+                const imgUrl = item.image || 'https://via.placeholder.com/40?text=Food';
+                const isHave = item.is_purchased;
+
+                // Format meta info
+                // "3 large (750 gr)"
+                let meta = '';
+                if (item.size) meta += item.size;
+                if (item.quantity) meta += ` (${item.quantity})`;
+
+                const html = `
+                <div class="list-item">
+                    <img src="${imgUrl}" class="item-icon">
+                    <div class="item-details">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-meta">${meta}</div>
+                    </div>
+                    <div class="item-actions">
+                        <span class="action-icon" onclick='editItem(${JSON.stringify(item)})'>✎</span>
+                        <span class="action-icon flag ${isHave ? 'active' : ''}" onclick="toggleStatus('${item.id}', ${!isHave})">⚑</span>
+                        <span class="action-icon" style="color:red; font-size:0.9rem;" onclick="deleteItem('${item.id}')">🗑️</span>
+                    </div>
+                </div>
+            `;
+
+                if (isHave) {
+                    haveList.insertAdjacentHTML('beforeend', html);
+                } else {
+                    list.insertAdjacentHTML('beforeend', html);
+                }
+            });
+
+            if (haveList.innerHTML === '') haveList.innerHTML = '<div style="color:#ccc; text-align:center; padding:10px;">No items marked as have</div>';
+        }
+
+        async function toggleStatus(id, newStatus) {
+            const token = document.getElementById('authToken').value.trim();
+            try {
+                await fetch(`${BASE_URL}/status/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ is_purchased: newStatus })
+                });
+                fetchItems();
+            } catch (e) { alert(e); }
+        }
+
+        async function deleteItem(id) {
+            if (!confirm('Delete?')) return;
+            const token = document.getElementById('authToken').value.trim();
+            try {
+                await fetch(`${BASE_URL}/delete/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                fetchItems();
+            } catch (e) { alert(e); }
+        }
+
+        function editItem(item) {
+            switchTab('add');
+            document.getElementById('editItemId').value = item.id;
+            document.getElementById('itemName').value = item.name;
+
+            // Try to split size?
+            // Assumes "Value Unit" structure
+            if (item.size) {
+                const parts = item.size.split(' ');
+                if (parts.length > 1) {
+                    const unit = parts.pop();
+                    const val = parts.join(' ');
+                    // Check if unit is in options? Assuming yes for now or default
+                    document.getElementById('sizeUnit').value = unit;
+                    document.getElementById('sizeValue').value = val;
+                } else {
+                    document.getElementById('sizeValue').value = item.size;
+                    document.getElementById('sizeUnit').value = 'Pack'; // Default if no unit found
+                }
+            } else {
+                document.getElementById('sizeValue').value = '';
+                document.getElementById('sizeUnit').value = 'Pack';
+            }
+
+            document.getElementById('itemQty').value = item.quantity || '';
+            if (item.image) document.getElementById('imgPreview').src = item.image;
+
+            document.getElementById('submitBtn').innerText = "Update Item";
+            document.getElementById('cancelEditBtn').style.display = "block";
+        }
+
+        // Auto-load if pasted
+        document.getElementById('authToken').addEventListener('change', fetchItems);
+    </script>
+
+
+
+
+
+    <!-- Back to Dashboard Button -->
+    <a href="index.html" style="position: fixed; top: 10px; left: 10px; z-index: 9999; padding: 10px 20px; background: #6366f1; color: white; text-decoration: none; border-radius: 5px; font-family: sans-serif; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        ← Dashboard
+    </a>
+
+</body>
+
+</html>
